@@ -1,3 +1,4 @@
+mod browser;
 mod commands;
 mod settings;
 mod tray;
@@ -27,6 +28,7 @@ pub fn run() {
             commands::get_theme,
             commands::open_preferences,
             commands::open_external,
+            commands::call_in_browser,
             commands::get_preferences,
             commands::set_preferences
         ])

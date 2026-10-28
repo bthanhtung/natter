@@ -86,6 +86,21 @@ html.pm-glass.pm-active body *::-webkit-scrollbar-thumb {
   border-radius: 999px;
   background: var(--scroll-thumb, rgba(127, 127, 127, .45)) padding-box;
 }
+/* The hint on call buttons Facebook disables on WebKit (inject.js). */
+#pm-tip {
+  position: fixed;
+  z-index: 2147483647;
+  max-width: 240px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .85);
+  color: #fff;
+  font: 13px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
+  pointer-events: none;
+}
+html.pm-dark #pm-tip { background: rgba(255, 255, 255, .94); color: #000; }
+#pm-tip[hidden] { display: none; }
 #pm-drag { position: fixed; top: 0; left: 0; right: 0; height: 28px; z-index: 2147483647; }
 
 /* Themes. Light and Grey are Facebook's own light and dark variables, applied to every container

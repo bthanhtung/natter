@@ -177,6 +177,25 @@ pub fn open_external(app: tauri::AppHandle, url: String) -> Result<(), String> {
         .map_err(|_| "browser unavailable".to_owned())
 }
 
+/// Continues a call in a Chromium-based browser, which Facebook allows to call in encrypted chats.
+/// Without one, the chat opens in the default browser with a hint to install one.
+#[tauri::command]
+pub fn call_in_browser(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    let url = crate::browser::chat_url(&url).ok_or("not a chat")?;
+    if crate::browser::open_in_chromium(&url) {
+        return Ok(());
+    }
+    let _ = app
+        .notification()
+        .builder()
+        .title("Calls need Chrome, Edge or Brave")
+        .body("Facebook allows calls in encrypted chats only in Chromium-based browsers.")
+        .show();
+    app.opener()
+        .open_url(url.as_str(), None::<&str>)
+        .map_err(|_| "browser unavailable".to_owned())
+}
+
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Preferences {

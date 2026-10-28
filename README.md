@@ -15,7 +15,7 @@ PureMessenger shows Meta's own Messenger page (`facebook.com/messages`) in a nat
 - **Unread badge** on the Dock or taskbar and the tray, counting unread conversations (not Facebook notifications).
 - **Files, photos and GIFs.** Send them with the attach button, by dragging them onto the window, or by pasting. Attachments you download are saved to your Downloads folder, with a notification when they finish.
 - **Native notifications** with Do not disturb, hidden previews and sound options.
-- **Voice and video calls** open in their own app window, with access to the camera, microphone and screen sharing, where Facebook allows calls in the browser engine (see [Known limitations](#known-limitations)).
+- **Voice and video calls** open in their own app window, with access to the camera, microphone and screen sharing, where Facebook allows calls in the browser engine. Where it does not (encrypted chats on macOS and Linux), the call buttons say so and a click continues the call in Chrome, Edge, Brave or another Chromium-based browser (see [Known limitations](#known-limitations)).
 - **Tray app.** Closing the window keeps it running in the tray (optional). Open at login (optional). A second launch focuses the running window.
 
 ## Download and install
@@ -103,13 +103,14 @@ Themes work by reading Facebook's own light and dark color variables from the pa
 ## Privacy and security
 
 - PureMessenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the system webview's data folder. No cookies or session values are logged or sent anywhere.
-- The Messenger page can call only `core:window:allow-start-dragging`, `core:window:allow-internal-toggle-maximize` and five app commands (`set_unread`, `notify`, `get_theme`, `open_preferences`, `open_external`, which opens only http(s) URLs in the browser). It cannot read or change other preferences; only the bundled Preferences window can.
+- The Messenger page can call only `core:window:allow-start-dragging`, `core:window:allow-internal-toggle-maximize` and six app commands (`set_unread`, `notify`, `get_theme`, `open_preferences`, `open_external`, which opens only http(s) URLs in the browser, and `call_in_browser`, which accepts only Facebook chat URLs). It cannot read or change other preferences; only the bundled Preferences window can.
 - These permissions apply only to HTTPS Facebook origins. Other sites and non-chat Facebook pages open in the default browser.
 - Camera, microphone and screen sharing are granted to Facebook pages for calls and voice clips; macOS asks once for camera and microphone access. Call windows have no access to the app commands.
 
 ## Known limitations
 
-- **Calls in end-to-end encrypted chats are not available on macOS and Linux.** Facebook decides this on its servers for every WebKit-based browser, Safari included: the call buttons show "This browser doesn't support calls" even though the webview has the required WebRTC features. Windows uses the Chromium-based WebView2 and is not affected by this check.
+- **Calls in end-to-end encrypted chats are not available on macOS and Linux.** Facebook decides this on its servers for every WebKit-based browser, Safari included: the call buttons show "This browser doesn't support calls" even though the webview has the required WebRTC features. Windows uses the Chromium-based WebView2 and is not affected by this check. On macOS and Linux, hovering a call button shows "This app can't make this call" and clicking it opens the chat in the first Chromium-based browser found (Chrome, Edge, Brave, Arc, Chromium, Vivaldi, Opera), or in the default browser with a hint if there is none.
+- Facebook does not accept `.zip` attachments on the web (any browser); other archive formats are not blocked by that check.
 - Unread counting reads the chat list (unread rows are shown in bold), so it covers the conversations Messenger has loaded, which are the most recent ones.
 - Clicking a notification does not bring the app forward (the notification plugin does not support it).
 - Links that open a new window go to the default browser; only Facebook's own pages (calls) open in an app window.

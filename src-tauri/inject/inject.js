@@ -161,11 +161,77 @@
       invoke("open_external", { url: href });
     }
 
+    // Facebook turns calls in encrypted chats off for WebKit, the engine on macOS and Linux. The
+    // only disabled buttons in the conversation header are those calls; they get the app's own
+    // hint and continue the call in a Chromium-based browser (see browser.rs).
+    let callTip;
+
+    // In the language Facebook is shown in, not the system's.
+    function callHint() {
+      const language = document.documentElement.lang || (window.navigator && window.navigator.language) || "";
+      return /^vi\b/i.test(language)
+        ? "App không hỗ trợ tính năng này. Bấm để gọi bằng Messenger trên trình duyệt."
+        : "This app can't make this call. Click to call with Messenger in your browser.";
+    }
+
+    function blockedCallButton(target) {
+      if (window.__PM_PLATFORM__ === "windows" || !target || typeof target.closest !== "function") return null;
+      const button = target.closest('[role="button"][aria-disabled="true"]');
+      const chat = button && button.closest(SELECTORS.chat);
+      if (!chat) return null;
+      return button.getBoundingClientRect().top - chat.getBoundingClientRect().top < 100 ? button : null;
+    }
+
+    function showCallTip(button) {
+      if (!callTip) {
+        callTip = document.createElement("div");
+        callTip.id = "pm-tip";
+        callTip.setAttribute("role", "tooltip");
+        callTip.textContent = callHint();
+        document.documentElement.appendChild(callTip);
+      }
+      const rect = button.getBoundingClientRect();
+      callTip.hidden = false;
+      callTip.style.top = `${Math.round(rect.bottom + 8)}px`;
+      callTip.style.right = `${Math.max(8, Math.round(window.innerWidth - rect.right))}px`;
+    }
+
+    function hideCallTip() {
+      if (callTip) callTip.hidden = true;
+    }
+
+    function interceptCallButtons() {
+      // Capture phase: Facebook's own "not supported" tooltip never sees these hovers.
+      const over = event => {
+        const button = blockedCallButton(event.target);
+        if (!button) return;
+        event.stopPropagation();
+        showCallTip(button);
+      };
+      const out = event => {
+        const button = blockedCallButton(event.target);
+        if (!button) return;
+        event.stopPropagation();
+        if (!button.contains(event.relatedTarget)) hideCallTip();
+      };
+      window.addEventListener("mouseover", over, true);
+      window.addEventListener("pointerover", over, true);
+      window.addEventListener("mouseout", out, true);
+      window.addEventListener("pointerout", out, true);
+    }
+
     function interceptLinks() {
       // Capture phase, so Facebook's router never sees clicks that leave the chat.
       window.addEventListener("click", event => {
         if (event.button !== 0) return;
         const target = event.target;
+        if (blockedCallButton(target)) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          hideCallTip();
+          invoke("call_in_browser", { url: location.href });
+          return;
+        }
         const anchor = target && typeof target.closest === "function" ? target.closest("a[href]") : null;
         if (!anchor) return;
         let url;
@@ -359,6 +425,7 @@
 
     window.__PM_APPLY_THEME__ = applyTheme;
     interceptLinks();
+    interceptCallButtons();
     installNotifications();
     installShortcuts();
     if (systemDark && typeof systemDark.addEventListener === "function") systemDark.addEventListener("change", enforceMode);

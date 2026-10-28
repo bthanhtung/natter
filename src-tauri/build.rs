@@ -6,6 +6,7 @@ fn main() {
             "get_theme",
             "open_preferences",
             "open_external",
+            "call_in_browser",
             "get_preferences",
             "set_preferences",
         ]),

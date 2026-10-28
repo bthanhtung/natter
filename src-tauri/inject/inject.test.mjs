@@ -31,6 +31,7 @@ function sandbox({ host = 'www.facebook.com', path = '/messages', platform = 'wi
       this.handlers = new Map();
       this.className = '';
       this.textContent = '';
+      this.style = {};
       elements.push(this);
     }
     set id(value) { this.attributes.set('id', value); }
@@ -325,4 +326,35 @@ test('call popups and other Facebook pages are left untouched', () => {
     assert.equal(page.document.getElementById('pm-style'), null);
     assert.equal(page.events.has('click'), false);
   }
+});
+
+test('call buttons Facebook disables get the app hint and continue in the browser, except on Windows', () => {
+  const rect = top => ({ top, bottom: top + 36, right: 1080 });
+  const chat = { getBoundingClientRect: () => rect(0) };
+  const button = { getBoundingClientRect: () => rect(42), closest: selector => (selector === '[role="main"]' ? chat : null), contains: node => node === button };
+  const target = { closest: selector => (selector.includes('aria-disabled') ? button : null) };
+  const page = sandbox({ platform: 'macos' });
+  page.window.innerWidth = 1100;
+  page.html.lang = 'vi';
+  page.evaluate();
+  let stopped = false;
+  page.events.get('mouseover')({ target, stopPropagation() { stopped = true; } });
+  const tip = page.document.getElementById('pm-tip');
+  assert.ok(stopped && tip && tip.hidden === false);
+  assert.equal(tip.style.top, '86px');
+  assert.match(tip.textContent, /^App không hỗ trợ tính năng này/);
+  page.events.get('mouseout')({ target, relatedTarget: {}, stopPropagation() {} });
+  assert.equal(tip.hidden, true);
+  const click = { button: 0, target, prevented: false, preventDefault() { this.prevented = true; }, stopImmediatePropagation() {} };
+  page.events.get('click')(click);
+  assert.ok(click.prevented);
+  assert.deepEqual(page.calls.filter(call => call.command === 'call_in_browser').map(call => call.args.url), ['https://www.facebook.com/messages']);
+  const low = { getBoundingClientRect: () => rect(400), closest: () => chat };
+  page.events.get('click')({ button: 0, target: { closest: selector => (selector.includes('aria-disabled') ? low : null) }, preventDefault() { throw new Error('composer buttons are not calls'); }, stopImmediatePropagation() {} });
+
+  const windows = sandbox();
+  windows.evaluate();
+  const winClick = { button: 0, target, prevented: false, preventDefault() { this.prevented = true; }, stopImmediatePropagation() {} };
+  windows.events.get('click')(winClick);
+  assert.equal(winClick.prevented, false);
 });

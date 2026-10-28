@@ -12,6 +12,7 @@
     "allow-notify",
     "allow-get-theme",
     "allow-open-preferences",
-    "allow-open-external"
+    "allow-open-external",
+    "allow-call-in-browser"
   ]
 }
