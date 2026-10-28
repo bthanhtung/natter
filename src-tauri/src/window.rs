@@ -34,14 +34,36 @@ fn allowed_host(host: &str) -> bool {
         "fbcdn.net",
         "fbsbx.com",
         "facebook.net",
+        // Meta's account and sign-in pages, used by some sign-in and verification steps.
+        "meta.com",
     ]
     .iter()
     .any(|domain| host == *domain || host.ends_with(&format!(".{domain}")))
 }
 
+/// The challenge frames Facebook embeds during sign-in checks (reCAPTCHA, hCaptcha, Arkose).
+/// The navigation handler sees every frame, so without this they would open in the browser,
+/// away from the session being checked.
+fn captcha(url: &Url) -> bool {
+    let Some(host) = url.host_str() else {
+        return false;
+    };
+    let under = |domain: &str| host == domain || host.ends_with(&format!(".{domain}"));
+    ((matches!(host, "google.com" | "www.google.com") || under("recaptcha.net"))
+        && url.path().starts_with("/recaptcha/"))
+        || [
+            "gstatic.com",
+            "hcaptcha.com",
+            "arkoselabs.com",
+            "funcaptcha.com",
+        ]
+        .into_iter()
+        .any(under)
+}
+
 fn allowed_navigation(url: &Url) -> bool {
     url.as_str() == "about:blank"
-        || (url.scheme() == "https" && url.host_str().is_some_and(allowed_host))
+        || (url.scheme() == "https" && (url.host_str().is_some_and(allowed_host) || captcha(url)))
 }
 
 /// The destination of a Facebook link-shim redirect, when it is a web URL.
@@ -359,6 +381,36 @@ mod tests {
         }
         assert!(!allowed_host("facebook.com.evil.io"));
         assert!(!allowed_host("evilfacebook.com"));
+    }
+
+    #[test]
+    fn sign_in_challenges_stay_in_the_app() {
+        for url in [
+            "https://www.google.com/recaptcha/api2/anchor?k=1",
+            "https://www.google.com/recaptcha/enterprise/bframe?k=1",
+            "https://www.recaptcha.net/recaptcha/api2/anchor",
+            "https://www.gstatic.com/recaptcha/releases/x/recaptcha__en.js",
+            "https://newassets.hcaptcha.com/captcha/v1/x/static/hcaptcha.html",
+            "https://client-api.arkoselabs.com/fc/gc/?token=1",
+            "https://auth.meta.com/",
+            "https://accountscenter.meta.com/",
+        ] {
+            assert!(
+                allowed_navigation(&url::Url::parse(url).expect("valid URL")),
+                "{url}"
+            );
+        }
+        for url in [
+            "https://www.google.com/search?q=recaptcha",
+            "https://google.com.evil.io/recaptcha/api2/anchor",
+            "http://www.google.com/recaptcha/api2/anchor",
+            "https://example.com/recaptcha/",
+        ] {
+            assert!(
+                !allowed_navigation(&url::Url::parse(url).expect("valid URL")),
+                "{url}"
+            );
+        }
     }
 
     #[test]

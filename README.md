@@ -107,6 +107,7 @@ Themes work by reading Facebook's own light and dark color variables from the pa
 - PureMessenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the system webview's data folder. No cookies or session values are logged or sent anywhere.
 - The Messenger page can call only `core:window:allow-start-dragging`, `core:window:allow-internal-toggle-maximize` and six app commands (`set_unread`, `notify`, `get_theme`, `open_preferences`, `open_external`, which opens only http(s) URLs in the browser, and `call_in_browser`, which accepts only Facebook chat URLs). It cannot read or change other preferences; only the bundled Preferences window can.
 - These permissions apply only to HTTPS Facebook origins. Other sites and non-chat Facebook pages open in the default browser.
+- Sign-in checks stay in the app window, so they verify the session you are signing in to: Meta's account pages and the reCAPTCHA, hCaptcha and Arkose challenge frames Facebook embeds are allowed there.
 - Camera, microphone and screen sharing are granted to Facebook pages for calls and voice clips; macOS asks once for camera and microphone access. Call windows have no access to the app commands.
 
 ## Known limitations
