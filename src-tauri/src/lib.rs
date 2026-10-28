@@ -8,6 +8,15 @@ use tauri::{Manager, WindowEvent};
 use tauri_plugin_window_state::StateFlags;
 
 pub fn run() {
+    // The app does almost no async work, so two runtime workers instead of one per CPU core.
+    if let Ok(runtime) = tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(2)
+        .enable_all()
+        .build()
+    {
+        let runtime: &'static tokio::runtime::Runtime = Box::leak(Box::new(runtime));
+        tauri::async_runtime::set(runtime.handle().clone());
+    }
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
             window::show(app)

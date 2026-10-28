@@ -102,6 +102,10 @@ Facebook changes its markup from time to time. Everything that depends on it is 
 
 Themes work by reading Facebook's own light and dark color variables from the page and applying the chosen set with CSS, so nothing watches the page's DOM for theme changes.
 
+### Resource use
+
+Measured idle on macOS with a chat open: the app process itself uses about 26 MB of memory, 7 threads and no CPU. Nearly everything else is Facebook's own page in WebKit: about 400 MB for Messenger and about 130 MB for Facebook's end-to-end encryption engine, which runs in a hidden `fbsbx.com/maw_proxy_page` frame in its own process and is required for encrypted chats. The page keeps running while the window is hidden, so messages and notifications arrive in real time from the tray.
+
 ## Privacy and security
 
 - Pure Messenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the system webview's data folder. No cookies or session values are logged or sent anywhere.
