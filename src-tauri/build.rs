@@ -9,6 +9,7 @@ fn main() {
             "call_in_browser",
             "get_preferences",
             "set_preferences",
+            "sign_out",
         ]),
     ))
     .expect("Tauri build configuration must be valid");

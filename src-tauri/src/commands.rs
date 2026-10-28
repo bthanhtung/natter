@@ -196,6 +196,25 @@ pub fn call_in_browser(app: tauri::AppHandle, url: String) -> Result<(), String>
         .map_err(|_| "browser unavailable".to_owned())
 }
 
+/// Signs out of Facebook by clearing the chat window's session data, then shows the sign-in page.
+#[tauri::command]
+pub fn sign_out(app: tauri::AppHandle, state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or("main window unavailable")?;
+    window
+        .clear_all_browsing_data()
+        .map_err(|_| "the session could not be cleared")?;
+    window
+        .navigate(
+            url::Url::parse("https://www.facebook.com/messages/").expect("static URL is valid"),
+        )
+        .map_err(|_| "the sign-in page could not be opened")?;
+    let _ = set_unread(app.clone(), state, 0);
+    crate::window::show(&app);
+    Ok(())
+}
+
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Preferences {

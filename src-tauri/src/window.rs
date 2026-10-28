@@ -292,7 +292,7 @@ pub fn show_preferences(app: &AppHandle) -> tauri::Result<()> {
         ),
     )
     .title("Preferences")
-    .inner_size(480.0, 620.0)
+    .inner_size(480.0, 820.0)
     .resizable(false)
     .minimizable(false)
     .maximizable(false)

@@ -52,6 +52,7 @@ The builds are not code-signed, so the first launch shows a warning:
 | Open at login | Start PureMessenger when you sign in to your computer |
 | Keep running when closed | Closing the window hides it to the tray instead of quitting |
 | Glass effect (macOS) | Translucent window; uses more graphics power; applies after restarting the app |
+| Sign out of Facebook | Removes the Facebook session from this computer (click twice to confirm) |
 
 ## Build from source
 

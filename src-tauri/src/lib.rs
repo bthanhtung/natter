@@ -30,6 +30,7 @@ pub fn run() {
             commands::open_external,
             commands::call_in_browser,
             commands::get_preferences,
+            commands::sign_out,
             commands::set_preferences
         ])
         .setup(|app| {
