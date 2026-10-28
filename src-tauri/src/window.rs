@@ -1,6 +1,8 @@
-#[cfg(not(target_os = "macos"))]
-use tauri::window::Color;
-use tauri::{webview::NewWindowResponse, AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use std::sync::atomic::{AtomicU32, Ordering};
+use tauri::{
+    webview::{NewWindowFeatures, NewWindowResponse, PermissionKind, PermissionResponse},
+    AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
+};
 use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
@@ -47,6 +49,68 @@ fn facebook_redirect_target(url: &Url) -> Option<Url> {
         .filter(|target| matches!(target.scheme(), "http" | "https"))
 }
 
+/// Facebook opens calls with `window.open` on its own pages (or `about:blank` first); those get
+/// an app window. Everything else that asks for a new window goes to the browser.
+fn opens_in_app(url: &Url) -> bool {
+    if url.as_str() == "about:blank" {
+        return true;
+    }
+    url.scheme() == "https"
+        && url.host_str().is_some_and(|host| {
+            !matches!(host, "l.facebook.com" | "lm.facebook.com")
+                && ["facebook.com", "messenger.com"]
+                    .iter()
+                    .any(|domain| host == *domain || host.ends_with(&format!(".{domain}")))
+        })
+}
+
+/// Calls and voice clips need the camera, microphone and screen; nothing else is granted.
+fn media_permission<R: tauri::Runtime>(
+    _webview: tauri::Webview<R>,
+    kind: PermissionKind,
+) -> PermissionResponse {
+    match kind {
+        PermissionKind::Camera | PermissionKind::Microphone | PermissionKind::DisplayCapture => {
+            PermissionResponse::Allow
+        }
+        _ => PermissionResponse::Default,
+    }
+}
+
+fn open_externally(app: &AppHandle, url: &Url) {
+    if matches!(url.scheme(), "http" | "https" | "mailto") {
+        let _ = app.opener().open_url(url.as_str(), None::<&str>);
+    }
+}
+
+static CALL_WINDOWS: AtomicU32 = AtomicU32::new(0);
+
+/// A window for a call Facebook opens; the webview takes over the page's popup request.
+fn call_window(app: &AppHandle, features: NewWindowFeatures) -> tauri::Result<WebviewWindow> {
+    let label = format!("call-{}", CALL_WINDOWS.fetch_add(1, Ordering::Relaxed));
+    let handle = app.clone();
+    WebviewWindowBuilder::new(
+        app,
+        label,
+        WebviewUrl::External(Url::parse("about:blank").expect("static URL is valid")),
+    )
+    .title("PureMessenger")
+    .inner_size(960.0, 640.0)
+    .min_inner_size(400.0, 300.0)
+    .theme(app.state::<SettingsStore>().get().theme.native())
+    .user_agent(UA)
+    .on_permission_request(media_permission)
+    .on_navigation(move |url| {
+        if allowed_navigation(url) {
+            return true;
+        }
+        open_externally(&handle, &external_new_window_url(url));
+        false
+    })
+    .window_features(features)
+    .build()
+}
+
 pub(crate) fn external_new_window_url(url: &Url) -> Url {
     facebook_redirect_target(url).unwrap_or_else(|| url.clone())
 }
@@ -59,9 +123,12 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
     } else {
         "linux"
     };
-    let theme = app.state::<SettingsStore>().get().theme;
+    let settings = app.state::<SettingsStore>().get();
+    let theme = settings.theme;
+    let glass = cfg!(target_os = "macos") && settings.glass;
+    crate::settings::set_glass_window(glass);
     let script = format!(
-        "window.__PM_PLATFORM__={};window.__PM_THEME__={};window.__PM_CSS__={};\n{INJECT_JS}",
+        "window.__PM_PLATFORM__={};window.__PM_THEME__={};window.__PM_GLASS__={glass};window.__PM_CSS__={};\n{INJECT_JS}",
         serde_json::to_string(platform).expect("static platform is JSON-serializable"),
         serde_json::to_string(&theme).expect("theme is JSON-serializable"),
         serde_json::to_string(CSS).expect("static CSS is JSON-serializable")
@@ -94,29 +161,34 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
         }
         false
     })
+    .on_permission_request(media_permission)
     .on_new_window({
         let app_handle = app.handle().clone();
-        move |url, _features| {
-            if matches!(url.scheme(), "http" | "https" | "mailto") {
-                let external_url = external_new_window_url(&url);
-                let _ = app_handle
-                    .opener()
-                    .open_url(external_url.as_str(), None::<&str>);
+        move |url, features| {
+            if opens_in_app(&url) {
+                if let Ok(window) = call_window(&app_handle, features) {
+                    return NewWindowResponse::Create { window };
+                }
             }
+            open_externally(&app_handle, &external_new_window_url(&url));
             NewWindowResponse::Deny
         }
     });
 
-    // macOS: a glass window with the title bar overlaid on the page, like system apps; the
-    // injected style pads both panes below the traffic lights. Elsewhere the title bar is native.
+    // macOS: the title bar is overlaid on the page, like system apps (the injected style pads both
+    // panes below the traffic lights), and the window is glass only when chosen. Elsewhere the
+    // title bar is native.
     #[cfg(target_os = "macos")]
-    let builder = builder
-        .transparent(true)
-        .effects(glass())
-        .title_bar_style(tauri::TitleBarStyle::Overlay)
-        .hidden_title(true);
-    #[cfg(not(target_os = "macos"))]
-    let builder = builder.background_color(Color(255, 255, 255, 255));
+    let builder = {
+        let builder = builder
+            .title_bar_style(tauri::TitleBarStyle::Overlay)
+            .hidden_title(true);
+        if glass {
+            builder.transparent(true).effects(glass_effects())
+        } else {
+            builder
+        }
+    };
 
     let window = builder.build()?;
     crate::settings::apply_chrome(&window, theme);
@@ -133,7 +205,7 @@ pub fn show(app: &AppHandle) {
 
 /// Liquid Glass on macOS 26 and later, the sidebar material on earlier releases.
 #[cfg(target_os = "macos")]
-fn glass() -> tauri::utils::config::WindowEffectsConfig {
+fn glass_effects() -> tauri::utils::config::WindowEffectsConfig {
     use tauri::window::{Effect, EffectState, EffectsBuilder};
     EffectsBuilder::new()
         .effect(Effect::LiquidGlassRegular)
@@ -167,7 +239,14 @@ pub fn show_preferences(app: &AppHandle) -> tauri::Result<()> {
     let builder = WebviewWindowBuilder::new(
         app,
         "preferences",
-        WebviewUrl::App("preferences.html".into()),
+        WebviewUrl::App(
+            if app.state::<SettingsStore>().get().glass {
+                "preferences.html?glass"
+            } else {
+                "preferences.html"
+            }
+            .into(),
+        ),
     )
     .title("Preferences")
     .inner_size(480.0, 620.0)
@@ -176,11 +255,16 @@ pub fn show_preferences(app: &AppHandle) -> tauri::Result<()> {
     .maximizable(false)
     .theme(app.state::<SettingsStore>().get().theme.native());
     #[cfg(target_os = "macos")]
-    let builder = builder
-        .transparent(true)
-        .effects(glass())
-        .title_bar_style(tauri::TitleBarStyle::Overlay)
-        .hidden_title(true);
+    let builder = {
+        let builder = builder
+            .title_bar_style(tauri::TitleBarStyle::Overlay)
+            .hidden_title(true);
+        if app.state::<SettingsStore>().get().glass {
+            builder.transparent(true).effects(glass_effects())
+        } else {
+            builder
+        }
+    };
     builder.build()?;
     Ok(())
 }
@@ -189,7 +273,34 @@ pub fn show_preferences(app: &AppHandle) -> tauri::Result<()> {
 mod tests {
     use super::{
         allowed_host, allowed_navigation, external_new_window_url, facebook_redirect_target,
+        opens_in_app,
     };
+
+    #[test]
+    fn calls_open_in_app_and_other_new_windows_do_not() {
+        for url in [
+            "about:blank",
+            "https://www.facebook.com/groupcall/ROOM:1/?call_id=2",
+            "https://www.messenger.com/groupcall/ROOM:1/",
+        ] {
+            assert!(
+                opens_in_app(&url::Url::parse(url).expect("valid URL")),
+                "{url}"
+            );
+        }
+        for url in [
+            "https://l.facebook.com/l.php?u=https%3A%2F%2Fexample.com",
+            "https://scontent.xx.fbcdn.net/v/photo.jpg",
+            "http://www.facebook.com/groupcall/ROOM:1/",
+            "https://facebook.com.evil.io/groupcall/",
+            "https://example.com/",
+        ] {
+            assert!(
+                !opens_in_app(&url::Url::parse(url).expect("valid URL")),
+                "{url}"
+            );
+        }
+    }
 
     #[test]
     fn exact_or_subdomain_only() {

@@ -10,18 +10,6 @@ html.pm-active __PM_STORIES_VIETNAMESE__ { display: none !important; }
 /* Native controls and scrollbars follow the chosen mode; Facebook leaves color-scheme unset. */
 html { color-scheme: light; }
 html.pm-dark { color-scheme: dark; }
-/* Messenger's panes: thin rounded scrollbars in Facebook's own thumb color, on a track that
-   matches the pane, instead of the system bar whose transparent track shows the glass. */
-html.pm-active body *::-webkit-scrollbar { width: 11px; height: 11px; background: transparent; }
-html.pm-active body *::-webkit-scrollbar-track,
-html.pm-active body *::-webkit-scrollbar-corner { background: transparent; }
-html.pm-active [role="main"] *::-webkit-scrollbar-track { background: var(--messenger-card-background, transparent); }
-html.pm-active body *::-webkit-scrollbar-thumb {
-  border: 3px solid transparent;
-  border-radius: 999px;
-  background: var(--scroll-thumb, rgba(127, 127, 127, .45)) padding-box;
-}
-html.pm-active body *::-webkit-scrollbar-thumb:hover { border-width: 2px; }
 /* App-like: no page-level scrollbars. Taller pages (login, checkpoints) still scroll by
    trackpad, wheel and keyboard; Messenger's own panes keep their scrollbars. */
 html { scrollbar-width: none !important; }
@@ -42,47 +30,61 @@ html.pm-active [role="main"] > div > div {
 }
 html.pm-dark.pm-active [role="main"] > div > div { border-left-color: rgba(255, 255, 255, .08); }
 
-/* macOS glass, after Apple's Liquid Glass guidelines: the window is the glass material, the chat
-   list floats on it as an inset panel with concentric corners (the traffic lights sit inside it,
-   as in macOS 26 sidebars), and the conversation is the opaque content layer. The top 28px of
-   the window is a draggable title strip. */
-html.pm-glass.pm-active, html.pm-glass.pm-active body { background: transparent !important; }
-/* Sign-in and other pages keep their own background and start below the title bar. */
-html.pm-glass:not(.pm-active) body { padding-top: 28px !important; box-sizing: border-box; }
-html.pm-glass.pm-active .__fb-light-mode,
-html.pm-glass.pm-active .__fb-dark-mode { --web-wash: transparent !important; }
-html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]),
-html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) .__fb-light-mode,
-html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) .__fb-dark-mode {
-  --surface-background: transparent !important;
-  --card-background: transparent !important;
-  --messenger-card-background: transparent !important;
-  background-color: transparent !important;
-}
-html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
+/* macOS, after Apple's macOS 26 design: the title bar is overlaid on the page (its top 28px is a
+   draggable strip), the chat list floats as an inset panel with concentric corners and the traffic
+   lights inside it, and the conversation is the content layer. The window is opaque by default,
+   which keeps scrolling and animation as cheap as possible. */
+html.pm-mac:not(.pm-active) body { padding-top: 28px !important; box-sizing: border-box; }
+html.pm-mac.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
   margin: 8px !important;
   height: calc(100% - 16px) !important;
   padding-top: 24px !important;
   box-sizing: border-box !important;
   border-radius: 18px !important;
+  overflow: hidden !important;
+  background-color: var(--surface-background) !important;
+  box-shadow: 0 0 0 .5px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .08) !important;
+}
+html.pm-mac.pm-dark.pm-active [role="navigation"]:not([aria-label="Facebook"]) { box-shadow: 0 0 0 .5px rgba(255, 255, 255, .1) !important; }
+html.pm-mac.pm-active [role="main"] > div > div {
+  padding-top: 28px !important;
+  box-sizing: border-box !important;
+  border-left: 0 !important;
+}
+
+/* Optional glass (Preferences): the window is the glass material (Liquid Glass on macOS 26, the
+   sidebar material earlier) and shows through the page and the chat panel. It costs GPU time on
+   every frame, so it is off by default. */
+html.pm-glass.pm-active, html.pm-glass.pm-active body { background: transparent !important; }
+html.pm-glass.pm-active .__fb-light-mode,
+html.pm-glass.pm-active .__fb-dark-mode { --web-wash: transparent !important; }
+html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) .__fb-light-mode,
+html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) .__fb-dark-mode,
+html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
+  --surface-background: transparent !important;
+  --card-background: transparent !important;
+  --messenger-card-background: transparent !important;
+}
+html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
   background-color: rgba(255, 255, 255, .5) !important;
   box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .08), inset 0 1px 0 rgba(255, 255, 255, .7), 0 6px 24px rgba(0, 0, 0, .12) !important;
-  overflow: hidden !important;
 }
 html.pm-glass.pm-dark.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
   background-color: rgba(255, 255, 255, .06) !important;
   box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .14), inset 0 1px 0 rgba(255, 255, 255, .1), 0 6px 24px rgba(0, 0, 0, .35) !important;
 }
-html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) label {
-  box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .08);
-}
-html.pm-glass.pm-dark.pm-active [role="navigation"]:not([aria-label="Facebook"]) label {
-  box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .12);
-}
-html.pm-glass.pm-active [role="main"] > div > div {
-  padding-top: 28px !important;
-  box-sizing: border-box !important;
-  border-left: 0 !important;
+html.pm-glass.pm-active [role="navigation"]:not([aria-label="Facebook"]) label { box-shadow: inset 0 0 0 .5px rgba(0, 0, 0, .08); }
+html.pm-glass.pm-dark.pm-active [role="navigation"]:not([aria-label="Facebook"]) label { box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .12); }
+/* On glass the system scrollbar's transparent track shows the material, so the panes get thin
+   scrollbars in Facebook's thumb color on a track matching the pane. */
+html.pm-glass.pm-active body *::-webkit-scrollbar { width: 11px; height: 11px; background: transparent; }
+html.pm-glass.pm-active body *::-webkit-scrollbar-track,
+html.pm-glass.pm-active body *::-webkit-scrollbar-corner { background: transparent; }
+html.pm-glass.pm-active [role="main"] *::-webkit-scrollbar-track { background: var(--messenger-card-background, transparent); }
+html.pm-glass.pm-active body *::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: var(--scroll-thumb, rgba(127, 127, 127, .45)) padding-box;
 }
 #pm-drag { position: fixed; top: 0; left: 0; right: 0; height: 28px; z-index: 2147483647; }
 

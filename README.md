@@ -9,10 +9,12 @@ PureMessenger shows Meta's own Messenger page (`facebook.com/messages`) in a nat
 ## Features
 
 - **Chat only.** The window shows your chats, their media viewer and the sign-in steps, nothing else. Profiles, posts, groups and every other link open in your default browser, and Facebook's home feed is replaced by the chats.
-- **Desktop look.** Full-height panes with no page scrollbars or Facebook header. On macOS the window is glass (Liquid Glass on macOS 26 and later, the translucent sidebar material on earlier releases), with the chat list as a floating panel.
+- **Desktop look.** Full-height panes with no page scrollbars or Facebook header. On macOS the title bar blends into the window and the chat list floats as a rounded panel, after Apple's macOS 26 design. An optional glass window (Liquid Glass on macOS 26 and later, the translucent sidebar material earlier) can be turned on in Preferences.
+- **Light and fast.** The app adds no work while you scroll, type or hover: themes are plain CSS, and the unread count runs only when Facebook retitles the page, at idle time.
 - **Themes.** System, Light, Grey, Dark (true black) and High contrast, applied to the whole page and window without a reload.
 - **Unread badge** on the Dock or taskbar and the tray, counting unread conversations (not Facebook notifications).
 - **Native notifications** with Do not disturb, hidden previews and sound options.
+- **Voice and video calls** open in their own app window, with access to the camera, microphone and screen sharing, where Facebook allows calls in the browser engine (see [Known limitations](#known-limitations)).
 - **Tray app.** Closing the window keeps it running in the tray (optional). Open at login (optional). A second launch focuses the running window.
 
 ## Download and install
@@ -48,6 +50,7 @@ The builds are not code-signed, so the first launch shows a warning:
 | Notification sounds | Play the system notification sound |
 | Open at login | Start PureMessenger when you sign in to your computer |
 | Keep running when closed | Closing the window hides it to the tray instead of quitting |
+| Glass effect (macOS) | Translucent window; uses more graphics power; applies after restarting the app |
 
 ## Build from source
 
@@ -100,13 +103,15 @@ Themes work by reading Facebook's own light and dark color variables from the pa
 
 - PureMessenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the system webview's data folder. No cookies or session values are logged or sent anywhere.
 - The Messenger page can call only `core:window:allow-start-dragging`, `core:window:allow-internal-toggle-maximize` and five app commands (`set_unread`, `notify`, `get_theme`, `open_preferences`, `open_external`, which opens only http(s) URLs in the browser). It cannot read or change other preferences; only the bundled Preferences window can.
-- These permissions apply only to HTTPS Facebook origins. Other sites, new windows and non-chat Facebook pages open in the default browser.
+- These permissions apply only to HTTPS Facebook origins. Other sites and non-chat Facebook pages open in the default browser.
+- Camera, microphone and screen sharing are granted to Facebook pages for calls and voice clips; macOS asks once for camera and microphone access. Call windows have no access to the app commands.
 
 ## Known limitations
 
+- **Calls in end-to-end encrypted chats are not available on macOS and Linux.** Facebook decides this on its servers for every WebKit-based browser, Safari included: the call buttons show "This browser doesn't support calls" even though the webview has the required WebRTC features. Windows uses the Chromium-based WebView2 and is not affected by this check.
 - Unread counting reads the chat list (unread rows are shown in bold), so it covers the conversations Messenger has loaded, which are the most recent ones.
 - Clicking a notification does not bring the app forward (the notification plugin does not support it).
-- Calls and links that open a new window go to the default browser.
+- Links that open a new window go to the default browser; only Facebook's own pages (calls) open in an app window.
 - WebRTC calls on Linux (WebKitGTK) may be unreliable.
 - Facebook markup changes can break selectors until they are updated (see [Maintenance](#maintenance)).
 

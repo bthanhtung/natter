@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const script = readFileSync(new URL('./inject.js', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./inject.css', import.meta.url), 'utf8');
 
-function sandbox({ host = 'www.facebook.com', path = '/messages', platform = 'windows', title = 'Messenger', frame = false, bridge = true, serviceWorker = false, theme, savedTheme, systemDark = false } = {}) {
+function sandbox({ host = 'www.facebook.com', path = '/messages', platform = 'windows', title = 'Messenger', frame = false, bridge = true, serviceWorker = false, theme, savedTheme, systemDark = false, opener = false } = {}) {
   const calls = [];
   const timers = new Map();
   const observers = [];
@@ -90,6 +90,7 @@ function sandbox({ host = 'www.facebook.com', path = '/messages', platform = 'wi
     addEventListener(name, callback) { events.set(name, callback); }
   };
   window.top = frame ? {} : window;
+  if (opener) window.opener = {};
   if (serviceWorker) window.ServiceWorkerRegistration = class { showNotification() {} };
   if (bridge) window.__TAURI_INTERNALS__ = { invoke(command, args) { calls.push({ command, args }); return Promise.resolve(command === 'get_theme' ? savedTheme : undefined); } };
   const context = vm.createContext({
@@ -126,30 +127,28 @@ test('only top-level Facebook initializes and repeated injection is idempotent',
   assert.match(page.document.getElementById('pm-style').textContent, /html\.pm-active \[role="region"\]\[aria-label="Tin" i\]/);
 });
 
-test('the badge counts unread chat rows, not the title, and only sends changes', () => {
+test('the badge counts unread chat rows when the title changes, and only sends changes', () => {
   const page = sandbox({ title: '(2) Messenger | Facebook' });
   const span = (text, weight) => ({ firstElementChild: null, textContent: text, weight });
   const row = (...spans) => ({ getElementsByTagName: () => spans });
-  const rows = [row(span('Alice', '400'), span('hi', '400'))];
+  const rows = [row(span('Alice', '400'), span('hi', '400'), span('badge', '700'))];
   page.page.list = { querySelectorAll: () => rows };
   page.evaluate();
   page.flush();
-  rows.push(row(span('Bob', '700'), span('new', '700')), row(span('', '700'), { firstElementChild: {}, textContent: 'x', weight: '700' }));
-  const listObserver = () => page.observers.find(observer => observer.target === page.page.list);
-  listObserver().callback();
-  listObserver().callback();
+  rows.push(row(span('', '700'), { firstElementChild: {}, textContent: 'x', weight: '700' }, span('Bob', '700')));
+  page.mutateTitle('(3) Messenger | Facebook');
+  page.mutateTitle('(3) Messenger | Facebook');
   page.flush();
   rows.splice(1);
-  page.mutateTitle('(5) Messenger | Facebook');
+  page.mutateTitle('(2) Messenger | Facebook');
   page.flush();
-  page.mutateTitle('(6) Messenger | Facebook');
+  page.mutateTitle('(2) Messenger | Facebook');
   page.flush();
   assert.deepEqual(page.calls.filter(call => call.command === 'set_unread').map(call => call.args.count), [0, 1, 0]);
-  assert.equal(page.observers.filter(observer => observer.target).length, 4);
+  assert.equal(page.observers.filter(observer => observer.target).length, 3);
   page.events.get('pagehide')();
   assert.equal(page.observers.filter(observer => observer.target).length, 0);
 });
-
 test('notification shim forwards only while not focused and supports permission API', async () => {
   const page = sandbox({ serviceWorker: true });
   page.evaluate();
@@ -250,17 +249,22 @@ test('the home feed is replaced by the chats', () => {
   }
 });
 
-test('macOS gets the glass class and a draggable title strip; other platforms do not', () => {
+test('macOS gets the overlay chrome and a draggable strip; glass only when chosen', () => {
   const macos = sandbox({ platform: 'macos' });
   macos.evaluate();
   macos.evaluate();
-  assert.ok(macos.htmlClasses.has('pm-glass'));
+  assert.ok(macos.htmlClasses.has('pm-mac'));
+  assert.equal(macos.htmlClasses.has('pm-glass'), false);
   const strips = macos.elements.filter(element => element.id === 'pm-drag');
   assert.equal(strips.length, 1);
   assert.ok(strips[0].hasAttribute('data-tauri-drag-region'));
+  const glass = sandbox({ platform: 'macos' });
+  glass.window.__PM_GLASS__ = true;
+  glass.evaluate();
+  assert.ok(glass.htmlClasses.has('pm-mac') && glass.htmlClasses.has('pm-glass'));
   const windows = sandbox();
   windows.evaluate();
-  assert.equal(windows.htmlClasses.has('pm-glass'), false);
+  assert.equal(windows.htmlClasses.has('pm-mac') || windows.htmlClasses.has('pm-glass'), false);
   assert.equal(windows.document.getElementById('pm-drag'), null);
 });
 
@@ -311,4 +315,14 @@ test('the body watch for login forms stops once the chats are on screen', () => 
   assert.equal(watching(), false);
   page.evaluate();
   assert.equal(watching(), false);
+});
+
+test('call popups and other Facebook pages are left untouched', () => {
+  for (const options of [{ path: '/groupcall/ROOM:1/' }, { opener: true }, { path: '/profile.php' }]) {
+    const page = sandbox(options);
+    page.evaluate();
+    assert.equal(page.window.__PM_INIT__, undefined, JSON.stringify(options));
+    assert.equal(page.document.getElementById('pm-style'), null);
+    assert.equal(page.events.has('click'), false);
+  }
 });

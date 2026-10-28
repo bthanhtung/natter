@@ -14,7 +14,7 @@
     loginForm: 'form[action*="login"], input[name="pass"]',
     // Messenger's own layout; once it is on screen the login form check can stop.
     chat: '[role="main"]',
-    // The conversation list and its rows; a row with bold text is unread.
+    // The conversation list and its rows; a row whose name or preview is bold is unread.
     chatList: '[role="navigation"]:not([aria-label="Facebook"])',
     chatRow: 'a[role="link"][href*="/t/"]'
   };
@@ -35,12 +35,12 @@
 
   try {
     if (window.top !== window || !/^(?:facebook\.com|.+\.facebook\.com)$/i.test(location.hostname) || window.__PM_INIT__) return;
+    // Only the chat window: call popups (which share the webview setup on macOS) keep Facebook's page as is.
+    if (window.opener || !(CHAT_PATH.test(location.pathname) || AUTH_PATH.test(location.pathname) || HOME_PATH.test(location.pathname))) return;
     window.__PM_INIT__ = true;
 
     let titleObserver;
     let titleElement;
-    let listObserver;
-    let listElement;
     let headObserver;
     let bodyObserver;
     let chatShown = false;
@@ -211,10 +211,12 @@
       pageMode();
     }
 
-    function installGlass() {
-      // macOS: the window is glass with its title bar over the page (see window.rs).
+    function installMacChrome() {
+      // macOS: the title bar is overlaid on the page and, if chosen in Preferences, the window is
+      // glass (see window.rs).
       if (window.__PM_PLATFORM__ !== "macos" || document.getElementById("pm-drag")) return;
-      document.documentElement.classList.add("pm-glass");
+      document.documentElement.classList.add("pm-mac");
+      if (window.__PM_GLASS__ === true) document.documentElement.classList.add("pm-glass");
       const strip = document.createElement("div");
       strip.id = "pm-drag";
       strip.setAttribute("data-tauri-drag-region", "");
@@ -222,8 +224,12 @@
     }
 
     function isUnread(row) {
+      // The name and the preview are the first text spans; checking two keeps style reads cheap.
+      let checked = 0;
       for (const span of row.getElementsByTagName("span")) {
-        if (!span.firstElementChild && span.textContent && Number(getComputedStyle(span).fontWeight) >= 600) return true;
+        if (span.firstElementChild || !span.textContent) continue;
+        if (Number(getComputedStyle(span).fontWeight) >= 600) return true;
+        if (++checked === 2) break;
       }
       return false;
     }
@@ -231,27 +237,17 @@
     // The page title's "(N)" also counts Facebook notifications such as friend requests, so the
     // badge counts unread conversations in the chat list instead.
     function unreadCount() {
-      if (!listElement) return 0;
+      const list = document.querySelector(SELECTORS.chatList);
+      if (!list) return 0;
       let count = 0;
-      for (const row of listElement.querySelectorAll(SELECTORS.chatRow)) {
+      for (const row of list.querySelectorAll(SELECTORS.chatRow)) {
         if (isUnread(row)) count++;
       }
       return Math.min(count, 9999);
     }
 
-    function watchList() {
-      const list = document.querySelector(SELECTORS.chatList);
-      if (list === listElement) return;
-      listElement = list;
-      if (listObserver) listObserver.disconnect();
-      if (!list) return;
-      listObserver = listObserver || new MutationObserver(scheduleUnread);
-      listObserver.observe(list, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class"] });
-    }
-
     function sendUnread() {
       unreadTimer = undefined;
-      watchList();
       const count = unreadCount();
       if (count !== lastUnread) {
         lastUnread = count;
@@ -259,10 +255,14 @@
       }
     }
 
+    // Facebook retitles the page whenever a message arrives or is read, so the title is the only
+    // trigger; the count runs when the page is idle, never during scrolling or typing.
     function scheduleUnread() {
-      // Throttled: hovering the list changes classes continuously.
       if (unreadTimer) return;
-      unreadTimer = setTimeout(sendUnread, 700);
+      unreadTimer = setTimeout(() => {
+        if (typeof requestIdleCallback === "function") requestIdleCallback(sendUnread, { timeout: 2000 });
+        else sendUnread();
+      }, 500);
     }
 
     function observeTitle() {
@@ -343,7 +343,7 @@
 
     function initializeDOM() {
       installStyle();
-      installGlass();
+      installMacChrome();
       applyTheme(theme);
       scanModeSheets();
       observeHead();
@@ -390,7 +390,7 @@
     }
     window.addEventListener("popstate", pageMode);
     window.addEventListener("pagehide", () => {
-      for (const observer of [titleObserver, headObserver, bodyObserver, listObserver]) {
+      for (const observer of [titleObserver, headObserver, bodyObserver]) {
         if (observer) observer.disconnect();
       }
       clearTimeout(unreadTimer);

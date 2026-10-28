@@ -1,5 +1,12 @@
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf, sync::Mutex};
+use std::{
+    fs,
+    path::PathBuf,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Mutex,
+    },
+};
 use tauri::{
     menu::{CheckMenuItem, IsMenuItem, MenuItemKind, Submenu},
     window::Color,
@@ -61,6 +68,8 @@ pub struct Settings {
     pub show_previews: bool,
     pub sounds: bool,
     pub close_to_tray: bool,
+    /// macOS only: a translucent glass window. Read when the window is created.
+    pub glass: bool,
 }
 
 impl Default for Settings {
@@ -71,6 +80,7 @@ impl Default for Settings {
             show_previews: true,
             sounds: true,
             close_to_tray: true,
+            glass: false,
         }
     }
 }
@@ -189,8 +199,14 @@ pub fn find_submenu<R: Runtime>(items: Vec<MenuItemKind<R>>, title: &str) -> Opt
     })
 }
 
-/// The window background, which also fills the transparent macOS title bar above the page.
-#[cfg_attr(target_os = "macos", allow(dead_code))]
+/// Whether the main window was created as glass; the setting itself applies after a restart.
+static GLASS_WINDOW: AtomicBool = AtomicBool::new(false);
+
+pub fn set_glass_window(glass: bool) {
+    GLASS_WINDOW.store(glass, Ordering::Relaxed);
+}
+
+/// The window background, shown before the page paints.
 fn chrome_color(theme: ThemeChoice, system_dark: bool) -> Color {
     match theme {
         ThemeChoice::Light | ThemeChoice::HighContrast => Color(255, 255, 255, 255),
@@ -201,16 +217,14 @@ fn chrome_color(theme: ThemeChoice, system_dark: bool) -> Color {
     }
 }
 
-/// Recolors the main window's chrome; call again when the system appearance changes.
-/// On macOS the window is glass and its material follows the native theme instead.
+/// Recolors the main window's background; call again when the system appearance changes.
+/// A glass window keeps its material, which follows the native theme.
 pub fn apply_chrome(window: &WebviewWindow, theme: ThemeChoice) {
-    #[cfg(not(target_os = "macos"))]
-    {
-        let system_dark = window.theme().is_ok_and(|theme| theme == Theme::Dark);
-        let _ = window.set_background_color(Some(chrome_color(theme, system_dark)));
+    if GLASS_WINDOW.load(Ordering::Relaxed) {
+        return;
     }
-    #[cfg(target_os = "macos")]
-    let _ = (window, theme);
+    let system_dark = window.theme().is_ok_and(|theme| theme == Theme::Dark);
+    let _ = window.set_background_color(Some(chrome_color(theme, system_dark)));
 }
 
 /// Applies the theme to every native window and restyles the Messenger page in place.
@@ -240,7 +254,7 @@ mod tests {
         let settings = parse(r#"{"theme":"high_contrast","sounds":false}"#);
         assert_eq!(settings.theme, ThemeChoice::HighContrast);
         assert!(!settings.sounds);
-        assert!(settings.show_previews && settings.close_to_tray);
+        assert!(settings.show_previews && settings.close_to_tray && !settings.glass);
     }
 
     #[test]

@@ -13,13 +13,15 @@
   @media (prefers-color-scheme: dark) {
     :root { --bg: #18191a; --card: #242526; --text: #e4e6eb; --muted: #b0b3b8; --line: #3e4042; --off: #4e4f50; }
   }
-  /* macOS: the window is glass, so the page is translucent and starts below the title bar. */
+  /* macOS: the title bar is overlaid, so the page starts below it; with glass it is translucent. */
+  html.mac body { padding-top: 40px; }
+  html.mac .card { border-radius: 14px; }
+  html:not(.mac) .mac-only { display: none; }
   html.glass { --bg: transparent; --card: rgba(255, 255, 255, .55); --line: rgba(0, 0, 0, .1); }
   @media (prefers-color-scheme: dark) {
     html.glass { --card: rgba(255, 255, 255, .07); --line: rgba(255, 255, 255, .1); }
   }
-  html.glass body { padding-top: 40px; }
-  html.glass .card { border-radius: 14px; box-shadow: inset 0 0 0 .5px var(--line); }
+  html.glass .card { box-shadow: inset 0 0 0 .5px var(--line); }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 20px 20px 16px; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-user-select: none; user-select: none; }
   h2 { margin: 18px 4px 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
@@ -76,15 +78,17 @@
   <div class="card">
     <label class="row"><span>Open at login</span><span class="switch"><input type="checkbox" name="launchAtLogin"><span></span></span></label>
     <label class="row"><span>Keep running when closed<small>Closing the window hides it to the tray instead of quitting</small></span><span class="switch"><input type="checkbox" name="closeToTray"><span></span></span></label>
+    <label class="row mac-only"><span>Glass effect<small>Translucent window. Uses more graphics power; applies after restarting PureMessenger</small></span><span class="switch"><input type="checkbox" name="glass"><span></span></span></label>
   </div>
   <p id="status" role="status"></p>
 </form>
 <script>
   "use strict";
-  if (/Mac/.test(navigator.platform)) document.documentElement.classList.add("glass");
+  if (/Mac/.test(navigator.platform)) document.documentElement.classList.add("mac");
+  if (new URLSearchParams(location.search).has("glass")) document.documentElement.classList.add("glass");
   const form = document.getElementById("form");
   const status = document.getElementById("status");
-  const toggles = ["doNotDisturb", "showPreviews", "sounds", "closeToTray", "launchAtLogin"];
+  const toggles = ["doNotDisturb", "showPreviews", "sounds", "closeToTray", "glass", "launchAtLogin"];
 
   function invoke(command, args) {
     const bridge = window.__TAURI_INTERNALS__;
@@ -105,7 +109,8 @@
         doNotDisturb: form.elements.doNotDisturb.checked,
         showPreviews: form.elements.showPreviews.checked,
         sounds: form.elements.sounds.checked,
-        closeToTray: form.elements.closeToTray.checked
+        closeToTray: form.elements.closeToTray.checked,
+        glass: form.elements.glass.checked
       },
       launchAtLogin: form.elements.launchAtLogin.checked
     };
