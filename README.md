@@ -6,9 +6,12 @@ PureMessenger is a personal-use desktop wrapper around `https://www.facebook.com
 
 ## Features
 
-- A focused Messenger window with close-to-tray behavior and a Show/Quit tray menu.
+- A focused Messenger window with close-to-tray behavior and a Show/Preferences/Quit tray menu. The title bar is native (transparent and theme-colored on macOS), so Messenger fills the window without page scrollbars.
 - Unread indicator on the tray and supported platform launcher, plus native notifications.
-- External links open in the default browser; a second launch focuses the existing window.
+- Chat only: the window shows Messenger (`/messages`, its media viewer) and sign-in steps. Profiles, posts, groups and every other link open in the default browser, and Facebook's home feed is replaced by the chats. A second launch focuses the existing window.
+- On macOS the window is glass: Liquid Glass on macOS 26 and later, the translucent sidebar material on earlier releases, with the chat list showing through and the title bar overlaid on the page.
+- Appearance (System, Light, Grey, Dark, High contrast) can be switched from View → Appearance on macOS or the tray menu.
+- Preferences (⌘, on macOS from the app menu, Ctrl+, elsewhere, or the tray menu), modelled on the former Messenger desktop app: System, Light, Grey, Dark and High contrast themes; Do not disturb, notification previews and sounds; open at login; keep running in the tray when closed.
 
 ## Prerequisites
 
@@ -22,6 +25,7 @@ PureMessenger is a personal-use desktop wrapper around `https://www.facebook.com
 ```sh
 npm install
 npm run dev
+npm test
 npm run build
 ```
 
@@ -37,12 +41,12 @@ Release bundles are under `src-tauri/target/release/bundle`: macOS `.app`/`.dmg`
 
 ## Maintenance
 
-Update `SELECTORS` in `src-tauri/inject/inject.js` when Facebook changes its markup. Refresh the platform-specific `UA` constants in `src-tauri/src/window.rs` with stable browser versions, keeping WebKit on a Safari fingerprint and WebView2 on Edge.
+Update `SELECTORS`, `CHAT_PATH`/`AUTH_PATH` and `FB_MODE` in `src-tauri/inject/inject.js`, and the theme color variables in `src-tauri/inject/inject.css`, when Facebook changes its markup. Refresh the platform-specific `UA` constants in `src-tauri/src/window.rs` with stable browser versions, keeping WebKit on a Safari fingerprint and WebView2 on Edge.
 
 ## Security model
 
-The remote page receives only `core:window:allow-start-dragging` and three application commands (`allow-set-unread`, `allow-notify`, `allow-window-control`). Its capability applies only to HTTPS Facebook origins; navigation to unrelated domains and new-window links are opened externally. The app does not store Messenger data itself; the session resides in the operating system webview data directory. No cookie or session values are logged.
+The remote page receives only `core:window:allow-start-dragging` and five application commands (`allow-set-unread`, `allow-notify`, `allow-get-theme`, `allow-open-preferences`, `allow-open-external`, which opens only http(s) URLs in the default browser); it cannot read or change other preferences. Only the bundled Preferences window may call `get_preferences` and `set_preferences`. Settings are stored as `settings.json` in the application config directory. Its capability applies only to HTTPS Facebook origins; navigation to unrelated domains and new-window links are opened externally. The app does not store Messenger data itself; the session resides in the operating system webview data directory. No cookie or session values are logged.
 
 ## Manual test checklist
 
-On each target OS, verify login, close-to-tray, tray Show and Quit, unread badge, native notifications, external links opening in the browser, and second launch focusing the existing window. On macOS additionally verify Dock reopen after closing the window. On Linux use the tray menu, not left-click, to show the window.
+On each target OS, verify login, close-to-tray, tray Show and Quit, unread badge, native notifications, external links opening in the browser, second launch focusing the existing window, each theme, Preferences changes taking effect without a restart, and closing the window with "Keep running when closed" turned off. On macOS additionally verify Dock reopen after closing the window. On Linux use the tray menu, not left-click, to show the window.

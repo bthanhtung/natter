@@ -4,7 +4,6 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Manager,
 };
-use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 pub fn icon(unread: bool) -> Result<Image<'static>, tauri::Error> {
     let bytes = if unread {
@@ -17,8 +16,13 @@ pub fn icon(unread: bool) -> Result<Image<'static>, tauri::Error> {
 
 pub fn create(app: &tauri::App) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show", "Show PureMessenger", true, None::<&str>)?;
+    let preferences = MenuItem::with_id(app, "preferences", "Preferences…", true, None::<&str>)?;
+    let appearance = crate::settings::appearance_menu(
+        app,
+        app.state::<crate::settings::SettingsStore>().get().theme,
+    )?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &quit])?;
+    let menu = Menu::with_items(app, &[&show, &appearance, &preferences, &quit])?;
     let builder = TrayIconBuilder::with_id("main")
         .icon(icon(false)?)
         .icon_as_template(false)
@@ -26,11 +30,15 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
         .menu(&menu)
         .on_menu_event(|app, event| match event.id().as_ref() {
             "show" => crate::window::show(app),
-            "quit" => {
-                let _ = app.save_window_state(StateFlags::all() - StateFlags::VISIBLE);
-                app.exit(0);
+            "preferences" => {
+                let _ = crate::window::show_preferences(app);
             }
-            _ => {}
+            "quit" => crate::window::quit(app),
+            id => {
+                if let Some(theme) = crate::settings::ThemeChoice::from_menu_id(id) {
+                    let _ = crate::settings::set_theme(app, theme);
+                }
+            }
         })
         .on_tray_icon_event(|tray, event| {
             // Linux AppIndicator does not emit left-click events; use its menu instead.
@@ -43,7 +51,9 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
             {
                 let app = tray.app_handle();
                 if let Some(window) = app.get_webview_window("main") {
-                    if window.is_visible().unwrap_or(false) {
+                    // A window hidden behind others is brought forward instead of hidden.
+                    if window.is_visible().unwrap_or(false) && window.is_focused().unwrap_or(false)
+                    {
                         let _ = window.hide();
                     } else {
                         crate::window::show(app);

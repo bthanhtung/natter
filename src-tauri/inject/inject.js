@@ -11,18 +11,42 @@
     storiesEnglish: '[role="region"][aria-label*="Stories" i]',
     storiesVietnamese: '[role="region"][aria-label="Tin" i]',
     // Login form signals that chrome removal must be disabled.
-    loginForm: 'form[action*="login"], input[name="pass"]'
+    loginForm: 'form[action*="login"], input[name="pass"]',
+    // Messenger's own layout; once it is on screen the login form check can stop.
+    chat: '[role="main"]'
   };
+
+  // The window is chat-only: other Facebook pages open in the default browser.
+  const CHAT_PATH = /^\/(?:messages|messenger_media)(?:\/|$)/i;
+  // Sign-in and verification flows must stay in the window, and chrome removal stays off there.
+  const AUTH_PATH = /^\/(?:login|checkpoint|recover|two_step_verification|two_factor|cookie\/consent|privacy\/consent|confirmemail|device-based|auth)/i;
+  const HOME_PATH = /^\/(?:home\.php)?$/i;
+
+  // Facebook's light/dark switch: its color variables are defined for these classes in inline
+  // <style> rules (`:root, .__fb-light-mode` and `.__fb-dark-mode`), and inner containers carry
+  // the account-level class.
+  const FB_MODE = { dark: "__fb-dark-mode", light: "__fb-light-mode" };
+  const LIGHT_RULE = /^:root\s*,.*\.__fb-light-mode$/;
+  const DARK_RULE = /^\.__fb-dark-mode$/;
+  const THEMES = ["system", "light", "grey", "dark", "high_contrast"];
 
   try {
     if (window.top !== window || !/^(?:facebook\.com|.+\.facebook\.com)$/i.test(location.hostname) || window.__PM_INIT__) return;
     window.__PM_INIT__ = true;
 
-    const html = document.documentElement;
     let titleObserver;
+    let titleElement;
     let headObserver;
+    let bodyObserver;
+    let chatShown = false;
     let unreadTimer;
+    let pageModeTimer;
     let lastUnread;
+    let theme = THEMES.includes(window.__PM_THEME__) ? window.__PM_THEME__ : "system";
+    const systemDark = typeof window.matchMedia === "function" ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    const modeSheets = new WeakSet();
+    // Facebook inlines the same variable rules more than once; keep each block once.
+    const modeDeclarations = { dark: new Set(), light: new Set() };
 
     function invoke(command, args) {
       try {
@@ -30,10 +54,83 @@
         if (bridge && typeof bridge.invoke === "function") {
           const result = bridge.invoke(command, args);
           if (result && typeof result.catch === "function") result.catch(() => {});
+          return result;
         }
       } catch (_) {
         // An unavailable bridge must not interfere with Facebook.
       }
+      return undefined;
+    }
+
+    function wantsDark() {
+      if (theme === "grey" || theme === "dark") return true;
+      if (theme === "system") return !!(systemDark && systemDark.matches);
+      return false;
+    }
+
+    function enforceMode() {
+      const classes = document.documentElement && document.documentElement.classList;
+      if (!classes) return;
+      const dark = wantsDark();
+      classes.toggle("pm-dark", dark);
+      classes.toggle(FB_MODE.dark, dark);
+      classes.toggle(FB_MODE.light, !dark);
+    }
+
+    function addModeSheet(sheet) {
+      if (!sheet || modeSheets.has(sheet)) return false;
+      modeSheets.add(sheet);
+      let rules;
+      try {
+        rules = sheet.cssRules;
+      } catch (_) {
+        return false;
+      }
+      let found = false;
+      for (const rule of rules) {
+        const selector = rule.selectorText && rule.selectorText.trim();
+        if (!selector || !rule.style) continue;
+        const mode = DARK_RULE.test(selector) ? "dark" : LIGHT_RULE.test(selector) ? "light" : null;
+        if (!mode) continue;
+        modeDeclarations[mode].add(rule.style.cssText);
+        found = true;
+      }
+      return found;
+    }
+
+    function writeModeStyle() {
+      if (!document.documentElement) return;
+      let style = document.getElementById("pm-mode");
+      if (!style) {
+        style = document.createElement("style");
+        style.id = "pm-mode";
+        document.documentElement.appendChild(style);
+      }
+      // Containers pinned to the account's mode take the chosen mode's variables from CSS, so
+      // nothing has to watch the DOM and new containers never flash the other mode.
+      style.textContent =
+        `html.pm-dark,html.pm-dark .${FB_MODE.light}{${[...modeDeclarations.dark].join("")}}` +
+        `html:not(.pm-dark) .${FB_MODE.dark}{${[...modeDeclarations.light].join("")}}`;
+    }
+
+    function isModeStyle(node) {
+      return node && node.nodeName === "STYLE" && String(node.textContent).includes(FB_MODE.dark);
+    }
+
+    function scanModeSheets() {
+      let changed = false;
+      for (const sheet of document.styleSheets || []) {
+        if (isModeStyle(sheet.ownerNode) && addModeSheet(sheet)) changed = true;
+      }
+      if (changed) writeModeStyle();
+    }
+
+    function applyTheme(value) {
+      if (!THEMES.includes(value)) return;
+      theme = value;
+      const classes = document.documentElement && document.documentElement.classList;
+      if (classes) for (const name of THEMES) classes.toggle(`pm-theme-${name}`, name === theme);
+      enforceMode();
     }
 
     function installStyle() {
@@ -48,42 +145,79 @@
       document.documentElement.appendChild(style);
     }
 
-    function pageMode() {
-      const blocked = /^\/(?:login|checkpoint|recover|two_step_verification|cookie\/consent)/i.test(location.pathname);
-      const loginVisible = !!document.querySelector(SELECTORS.loginForm);
-      document.documentElement.classList.toggle("pm-active", !blocked && !loginVisible);
+    function keepInApp(url) {
+      if (!/^https?:$/.test(url.protocol)) return true;
+      // Other sites and Facebook's link shim are routed to the browser natively.
+      if (!/^(?:.+\.)?facebook\.com$/i.test(url.hostname) || /^lm?\.facebook\.com$/i.test(url.hostname)) return true;
+      return CHAT_PATH.test(url.pathname) || AUTH_PATH.test(url.pathname);
     }
 
-    function createTitlebar() {
-      if (document.getElementById("pm-titlebar")) return;
-      const platform = window.__PM_PLATFORM__;
-      if (!["macos", "windows", "linux"].includes(platform)) return;
-      const macos = platform === "macos";
-      document.documentElement.classList.add(macos ? "pm-macos" : "pm-has-titlebar");
-      const bar = document.createElement("div");
-      bar.id = "pm-titlebar";
-      bar.setAttribute("data-tauri-drag-region", "");
-      if (!macos) {
-        const label = document.createElement("span");
-        label.textContent = "PureMessenger";
-        label.setAttribute("data-tauri-drag-region", "");
-        bar.appendChild(label);
-        for (const [action, glyph] of [["minimize", "−"], ["maximize", "□"], ["close", "×"]]) {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = `pm-${action}`;
-          button.setAttribute("aria-label", action.charAt(0).toUpperCase() + action.slice(1));
-          button.textContent = glyph;
-          button.addEventListener("click", () => invoke("window_control", { action }));
-          bar.appendChild(button);
+    function openExternal(href) {
+      invoke("open_external", { url: href });
+    }
+
+    function interceptLinks() {
+      // Capture phase, so Facebook's router never sees clicks that leave the chat.
+      window.addEventListener("click", event => {
+        if (event.button !== 0) return;
+        const target = event.target;
+        const anchor = target && typeof target.closest === "function" ? target.closest("a[href]") : null;
+        if (!anchor) return;
+        let url;
+        try {
+          url = new URL(anchor.href, location.href);
+        } catch (_) {
+          return;
         }
+        if (keepInApp(url)) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        openExternal(url.href);
+      }, true);
+    }
+
+    function pageMode() {
+      const blocked = AUTH_PATH.test(location.pathname);
+      const loginVisible = !!document.querySelector(SELECTORS.loginForm);
+      document.documentElement.classList.toggle("pm-active", !blocked && !loginVisible);
+      // Signed in and showing chats: a login form can only return through a navigation, which
+      // reruns this script, so stop watching the body.
+      if (bodyObserver && !blocked && !loginVisible && document.querySelector(SELECTORS.chat)) {
+        chatShown = true;
+        bodyObserver.disconnect();
+        bodyObserver = undefined;
       }
-      document.documentElement.appendChild(bar);
+    }
+
+    function schedulePageMode() {
+      // Throttled rather than debounced: Facebook mutates the DOM continuously while loading.
+      if (pageModeTimer) return;
+      pageModeTimer = setTimeout(() => {
+        pageModeTimer = undefined;
+        pageMode();
+      }, 300);
+    }
+
+    function observeBody() {
+      if (bodyObserver || chatShown || !document.body) return;
+      bodyObserver = new MutationObserver(schedulePageMode);
+      bodyObserver.observe(document.body, { childList: true, subtree: true });
+      pageMode();
+    }
+
+    function installGlass() {
+      // macOS: the window is glass with its title bar over the page (see window.rs).
+      if (window.__PM_PLATFORM__ !== "macos" || document.getElementById("pm-drag")) return;
+      document.documentElement.classList.add("pm-glass");
+      const strip = document.createElement("div");
+      strip.id = "pm-drag";
+      strip.setAttribute("data-tauri-drag-region", "");
+      document.documentElement.appendChild(strip);
     }
 
     function unreadCount() {
       const match = /^\((\d+)\+?\)/.exec(document.title);
-      return match ? Math.min(Number(match[1]), Number.MAX_SAFE_INTEGER) : 0;
+      return match ? Math.min(Number(match[1]), 9999) : 0;
     }
 
     function sendUnread() {
@@ -100,20 +234,36 @@
     }
 
     function observeTitle() {
-      if (!document.head) return;
+      const title = document.head && document.head.querySelector("title");
+      if (title === titleElement) return;
+      titleElement = title;
       if (titleObserver) titleObserver.disconnect();
-      const title = document.head.querySelector("title");
       if (title) {
-        titleObserver = new MutationObserver(scheduleUnread);
+        titleObserver = titleObserver || new MutationObserver(scheduleUnread);
         titleObserver.observe(title, { childList: true, characterData: true, subtree: true });
       }
-      if (!headObserver) {
-        headObserver = new MutationObserver(() => {
-          observeTitle();
-          scheduleUnread();
-        });
-        headObserver.observe(document.head, { childList: true });
+      scheduleUnread();
+    }
+
+    function onHeadMutations(records) {
+      let titleChanged = false;
+      let modeChanged = false;
+      for (const record of records) {
+        for (const node of [...record.addedNodes, ...record.removedNodes]) {
+          if (node.nodeName === "TITLE") titleChanged = true;
+        }
+        for (const node of record.addedNodes) {
+          if (isModeStyle(node) && addModeSheet(node.sheet)) modeChanged = true;
+        }
       }
+      if (titleChanged) observeTitle();
+      if (modeChanged) writeModeStyle();
+    }
+
+    function observeHead() {
+      if (headObserver || !document.head) return;
+      headObserver = new MutationObserver(onHeadMutations);
+      headObserver.observe(document.head, { childList: true });
     }
 
     function forwardNotification(title, options) {
@@ -148,36 +298,76 @@
       }
     }
 
-    function initializeDOM() {
-      installStyle();
-      createTitlebar();
-      pageMode();
-      observeTitle();
-      scheduleUnread();
+    function installShortcuts() {
+      // macOS gets ⌘, from the application menu.
+      if (window.__PM_PLATFORM__ === "macos") return;
+      window.addEventListener("keydown", event => {
+        if (event.key === "," && event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey) {
+          event.preventDefault();
+          invoke("open_preferences");
+        }
+      }, true);
     }
 
-    installNotifications();
-    if (html) {
-      initializeDOM();
-    } else {
-      document.addEventListener("DOMContentLoaded", initializeDOM, { once: true });
+    function initializeDOM() {
+      installStyle();
+      installGlass();
+      applyTheme(theme);
+      scanModeSheets();
+      observeHead();
+      observeBody();
+      observeTitle();
     }
+
+    // Facebook's home feed (for example after signing in) is replaced by the chats.
+    if (HOME_PATH.test(location.pathname)) {
+      location.replace("/messages/");
+      return;
+    }
+
+    window.__PM_APPLY_THEME__ = applyTheme;
+    interceptLinks();
+    installNotifications();
+    installShortcuts();
+    if (systemDark && typeof systemDark.addEventListener === "function") systemDark.addEventListener("change", enforceMode);
+    // At document start only <html> may exist; DOMContentLoaded completes the head and body work.
+    if (document.documentElement) initializeDOM();
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initializeDOM, { once: true });
 
     for (const method of ["pushState", "replaceState"]) {
       const original = history[method];
       history[method] = function (...args) {
+        const before = location.href;
         const result = original.apply(this, args);
+        let url;
+        try {
+          url = new URL(location.href);
+        } catch (_) {
+          url = null;
+        }
+        // Script-driven navigation away from the chat (no link to intercept): show it in the browser instead.
+        if (url && !keepInApp(url)) {
+          openExternal(url.href);
+          if (method === "pushState") history.back();
+          else location.replace(before);
+          return result;
+        }
         pageMode();
         return result;
       };
     }
     window.addEventListener("popstate", pageMode);
     window.addEventListener("pagehide", () => {
-      if (titleObserver) titleObserver.disconnect();
-      if (headObserver) headObserver.disconnect();
+      for (const observer of [titleObserver, headObserver, bodyObserver]) {
+        if (observer) observer.disconnect();
+      }
       clearTimeout(unreadTimer);
+      clearTimeout(pageModeTimer);
     });
+
+    // The initialization script is fixed at window creation; ask for the theme saved since then.
+    const saved = invoke("get_theme");
+    if (saved && typeof saved.then === "function") saved.then(applyTheme, () => {});
   } catch (_) {
     // Injection must never break a remote page.
   }

@@ -1,5 +1,10 @@
-use tauri::{webview::NewWindowResponse, Manager, WebviewUrl, WebviewWindowBuilder};
+#[cfg(not(target_os = "macos"))]
+use tauri::window::Color;
+use tauri::{webview::NewWindowResponse, AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_opener::OpenerExt;
+use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+
+use crate::settings::SettingsStore;
 use url::Url;
 
 const INJECT_JS: &str = include_str!("../inject/inject.js");
@@ -28,20 +33,22 @@ fn allowed_navigation(url: &Url) -> bool {
         || (url.scheme() == "https" && url.host_str().is_some_and(allowed_host))
 }
 
-fn external_new_window_url(url: &Url) -> Url {
-    if matches!(url.scheme(), "http" | "https")
+/// The destination of a Facebook link-shim redirect, when it is a web URL.
+fn facebook_redirect_target(url: &Url) -> Option<Url> {
+    if !(matches!(url.scheme(), "http" | "https")
         && matches!(url.host_str(), Some("l.facebook.com" | "lm.facebook.com"))
-        && url.path() == "/l.php"
+        && url.path() == "/l.php")
     {
-        if let Some((_, target)) = url.query_pairs().find(|(key, _)| key == "u") {
-            if let Ok(target_url) = Url::parse(&target) {
-                if matches!(target_url.scheme(), "http" | "https") {
-                    return target_url;
-                }
-            }
-        }
+        return None;
     }
-    url.clone()
+    let (_, target) = url.query_pairs().find(|(key, _)| key == "u")?;
+    Url::parse(&target)
+        .ok()
+        .filter(|target| matches!(target.scheme(), "http" | "https"))
+}
+
+pub(crate) fn external_new_window_url(url: &Url) -> Url {
+    facebook_redirect_target(url).unwrap_or_else(|| url.clone())
 }
 
 pub fn create(app: &tauri::App) -> tauri::Result<()> {
@@ -52,9 +59,11 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
     } else {
         "linux"
     };
+    let theme = app.state::<SettingsStore>().get().theme;
     let script = format!(
-        "window.__PM_PLATFORM__={};window.__PM_CSS__={};\n{INJECT_JS}",
+        "window.__PM_PLATFORM__={};window.__PM_THEME__={};window.__PM_CSS__={};\n{INJECT_JS}",
         serde_json::to_string(platform).expect("static platform is JSON-serializable"),
+        serde_json::to_string(&theme).expect("theme is JSON-serializable"),
         serde_json::to_string(CSS).expect("static CSS is JSON-serializable")
     );
     let app_handle = app.handle().clone();
@@ -69,9 +78,14 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
     .title("PureMessenger")
     .inner_size(1100.0, 760.0)
     .min_inner_size(480.0, 400.0)
+    .theme(theme.native())
     .user_agent(UA)
     .initialization_script(&script)
     .on_navigation(move |url| {
+        if let Some(target) = facebook_redirect_target(url) {
+            let _ = app_handle.opener().open_url(target.as_str(), None::<&str>);
+            return false;
+        }
         if allowed_navigation(url) {
             return true;
         }
@@ -93,18 +107,23 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
         }
     });
 
+    // macOS: a glass window with the title bar overlaid on the page, like system apps; the
+    // injected style pads both panes below the traffic lights. Elsewhere the title bar is native.
     #[cfg(target_os = "macos")]
     let builder = builder
+        .transparent(true)
+        .effects(glass())
         .title_bar_style(tauri::TitleBarStyle::Overlay)
         .hidden_title(true);
     #[cfg(not(target_os = "macos"))]
-    let builder = builder.decorations(false);
+    let builder = builder.background_color(Color(255, 255, 255, 255));
 
-    builder.build()?;
+    let window = builder.build()?;
+    crate::settings::apply_chrome(&window, theme);
     Ok(())
 }
 
-pub fn show(app: &tauri::AppHandle) {
+pub fn show(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.unminimize();
         let _ = window.show();
@@ -112,9 +131,65 @@ pub fn show(app: &tauri::AppHandle) {
     }
 }
 
+/// Liquid Glass on macOS 26 and later, the sidebar material on earlier releases.
+#[cfg(target_os = "macos")]
+fn glass() -> tauri::utils::config::WindowEffectsConfig {
+    use tauri::window::{Effect, EffectState, EffectsBuilder};
+    EffectsBuilder::new()
+        .effect(Effect::LiquidGlassRegular)
+        .effect(Effect::Sidebar)
+        .state(EffectState::FollowsWindowActiveState)
+        .build()
+}
+
+pub fn quit(app: &AppHandle) {
+    let _ = app.save_window_state(StateFlags::all() - StateFlags::VISIBLE);
+    app.exit(0);
+}
+
+/// Closing the main window hides it to the tray or quits, as chosen in Preferences.
+pub fn close_main(app: &AppHandle) {
+    if app.state::<SettingsStore>().get().close_to_tray {
+        if let Some(window) = app.get_webview_window("main") {
+            let _ = window.hide();
+        }
+    } else {
+        quit(app);
+    }
+}
+
+pub fn show_preferences(app: &AppHandle) -> tauri::Result<()> {
+    if let Some(window) = app.get_webview_window("preferences") {
+        let _ = window.unminimize();
+        window.show()?;
+        return window.set_focus();
+    }
+    let builder = WebviewWindowBuilder::new(
+        app,
+        "preferences",
+        WebviewUrl::App("preferences.html".into()),
+    )
+    .title("Preferences")
+    .inner_size(480.0, 620.0)
+    .resizable(false)
+    .minimizable(false)
+    .maximizable(false)
+    .theme(app.state::<SettingsStore>().get().theme.native());
+    #[cfg(target_os = "macos")]
+    let builder = builder
+        .transparent(true)
+        .effects(glass())
+        .title_bar_style(tauri::TitleBarStyle::Overlay)
+        .hidden_title(true);
+    builder.build()?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{allowed_host, allowed_navigation, external_new_window_url};
+    use super::{
+        allowed_host, allowed_navigation, external_new_window_url, facebook_redirect_target,
+    };
 
     #[test]
     fn exact_or_subdomain_only() {
@@ -160,6 +235,25 @@ mod tests {
         let redirect =
             url::Url::parse("https://l.facebook.com/l.php?other=1").expect("valid redirect URL");
         assert_eq!(external_new_window_url(&redirect), redirect);
+    }
+
+    #[test]
+    fn in_page_redirects_resolve_only_for_the_link_shim() {
+        let redirect =
+            url::Url::parse("https://l.facebook.com/l.php?u=https%3A%2F%2Fexample.com%2F&h=x")
+                .expect("valid redirect URL");
+        assert_eq!(
+            facebook_redirect_target(&redirect).map(String::from),
+            Some("https://example.com/".to_owned())
+        );
+        for url in [
+            "https://www.facebook.com/l.php?u=https%3A%2F%2Fexample.com",
+            "https://l.facebook.com/other?u=https%3A%2F%2Fexample.com",
+            "https://l.facebook.com/l.php?u=file%3A%2F%2F%2Fetc%2Fpasswd",
+        ] {
+            let url = url::Url::parse(url).expect("valid URL");
+            assert_eq!(facebook_redirect_target(&url), None);
+        }
     }
 
     #[test]

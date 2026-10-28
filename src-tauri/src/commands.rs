@@ -9,7 +9,18 @@ use std::{
 #[cfg(target_os = "windows")]
 use tauri::image::Image;
 use tauri::Manager;
+use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_notification::NotificationExt;
+use tauri_plugin_opener::OpenerExt;
+
+use crate::settings::{Settings, SettingsStore, ThemeChoice};
+
+#[cfg(target_os = "macos")]
+const SOUND: &str = "Pop";
+#[cfg(target_os = "windows")]
+const SOUND: &str = "IM";
+#[cfg(target_os = "linux")]
+const SOUND: &str = "message-new-instant";
 
 pub struct AppState {
     unread: AtomicU32,
@@ -104,11 +115,16 @@ pub fn notify(
     title: String,
     body: String,
 ) -> Result<(), String> {
+    let settings = app.state::<SettingsStore>().get();
     let title = sanitize(&title, 64);
-    if title.is_empty() {
+    if settings.do_not_disturb || title.is_empty() {
         return Ok(());
     }
-    let body = sanitize(&body, 256);
+    let body = if settings.show_previews {
+        sanitize(&body, 256)
+    } else {
+        "New message".to_owned()
+    };
     let mut notifications = state
         .notifications
         .lock()
@@ -117,35 +133,82 @@ pub fn notify(
         return Ok(());
     }
     drop(notifications);
-    app.notification()
-        .builder()
-        .title(title)
-        .body(body)
+    let builder = app.notification().builder().title(title).body(body);
+    let builder = if settings.sounds {
+        builder.sound(SOUND)
+    } else {
+        builder
+    };
+    builder
         .show()
         .map_err(|_| "notification unavailable".to_owned())
 }
 
+/// Opens a link the chat-only window will not show, such as a profile, in the default browser.
 #[tauri::command]
-pub fn window_control(app: tauri::AppHandle, action: String) -> Result<(), String> {
-    let window = app
-        .get_webview_window("main")
-        .ok_or("main window unavailable")?;
-    match action.as_str() {
-        "minimize" => window.minimize(),
-        "maximize" => {
-            if window
-                .is_maximized()
-                .map_err(|_| "window operation failed")?
-            {
-                window.unmaximize()
-            } else {
-                window.maximize()
-            }
-        }
-        "close" => window.hide(),
-        _ => return Err("invalid action".to_owned()),
+pub fn open_external(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    let url = url::Url::parse(&url).map_err(|_| "invalid URL")?;
+    if !matches!(url.scheme(), "http" | "https") {
+        return Err("unsupported URL".to_owned());
     }
-    .map_err(|_| "window operation failed".to_owned())
+    let url = crate::window::external_new_window_url(&url);
+    app.opener()
+        .open_url(url.as_str(), None::<&str>)
+        .map_err(|_| "browser unavailable".to_owned())
+}
+
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Preferences {
+    #[serde(flatten)]
+    settings: Settings,
+    launch_at_login: bool,
+}
+
+fn preferences(app: &tauri::AppHandle) -> Preferences {
+    Preferences {
+        settings: app.state::<SettingsStore>().get(),
+        launch_at_login: app.autolaunch().is_enabled().unwrap_or(false),
+    }
+}
+
+#[tauri::command]
+pub fn get_theme(store: tauri::State<'_, SettingsStore>) -> ThemeChoice {
+    store.get().theme
+}
+
+#[tauri::command]
+pub fn open_preferences(app: tauri::AppHandle) -> Result<(), String> {
+    crate::window::show_preferences(&app).map_err(|_| "preferences unavailable".to_owned())
+}
+
+#[tauri::command]
+pub fn get_preferences(app: tauri::AppHandle) -> Preferences {
+    preferences(&app)
+}
+
+#[tauri::command]
+pub fn set_preferences(
+    app: tauri::AppHandle,
+    store: tauri::State<'_, SettingsStore>,
+    settings: Settings,
+    launch_at_login: bool,
+) -> Result<Preferences, String> {
+    let previous = store.get();
+    store.replace(settings.clone())?;
+    if previous.theme != settings.theme {
+        crate::settings::apply_theme(&app, settings.theme);
+    }
+    let autolaunch = app.autolaunch();
+    if autolaunch.is_enabled().unwrap_or(false) != launch_at_login {
+        if launch_at_login {
+            autolaunch.enable()
+        } else {
+            autolaunch.disable()
+        }
+        .map_err(|_| "launch at login could not be changed")?;
+    }
+    Ok(preferences(&app))
 }
 
 #[cfg(test)]

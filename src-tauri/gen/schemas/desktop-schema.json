@@ -345,10 +345,40 @@
       "description": "Permission identifier",
       "oneOf": [
         {
+          "description": "Enables the get_preferences command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-preferences",
+          "markdownDescription": "Enables the get_preferences command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get_theme command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-theme",
+          "markdownDescription": "Enables the get_theme command without any pre-configured scope."
+        },
+        {
           "description": "Enables the notify command without any pre-configured scope.",
           "type": "string",
           "const": "allow-notify",
           "markdownDescription": "Enables the notify command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the open_external command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-open-external",
+          "markdownDescription": "Enables the open_external command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the open_preferences command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-open-preferences",
+          "markdownDescription": "Enables the open_preferences command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the set_preferences command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-set-preferences",
+          "markdownDescription": "Enables the set_preferences command without any pre-configured scope."
         },
         {
           "description": "Enables the set_unread command without any pre-configured scope.",
@@ -357,10 +387,16 @@
           "markdownDescription": "Enables the set_unread command without any pre-configured scope."
         },
         {
-          "description": "Enables the window_control command without any pre-configured scope.",
+          "description": "Denies the get_preferences command without any pre-configured scope.",
           "type": "string",
-          "const": "allow-window-control",
-          "markdownDescription": "Enables the window_control command without any pre-configured scope."
+          "const": "deny-get-preferences",
+          "markdownDescription": "Denies the get_preferences command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_theme command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-theme",
+          "markdownDescription": "Denies the get_theme command without any pre-configured scope."
         },
         {
           "description": "Denies the notify command without any pre-configured scope.",
@@ -369,16 +405,70 @@
           "markdownDescription": "Denies the notify command without any pre-configured scope."
         },
         {
+          "description": "Denies the open_external command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-open-external",
+          "markdownDescription": "Denies the open_external command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the open_preferences command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-open-preferences",
+          "markdownDescription": "Denies the open_preferences command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the set_preferences command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-set-preferences",
+          "markdownDescription": "Denies the set_preferences command without any pre-configured scope."
+        },
+        {
           "description": "Denies the set_unread command without any pre-configured scope.",
           "type": "string",
           "const": "deny-set-unread",
           "markdownDescription": "Denies the set_unread command without any pre-configured scope."
         },
         {
-          "description": "Denies the window_control command without any pre-configured scope.",
+          "description": "This permission set configures if your\napplication can enable or disable auto\nstarting the application on boot.\n\n#### Granted Permissions\n\nIt allows all to check, enable and\ndisable the automatic start on boot.\n\n\n#### This default permission set includes:\n\n- `allow-enable`\n- `allow-disable`\n- `allow-is-enabled`",
           "type": "string",
-          "const": "deny-window-control",
-          "markdownDescription": "Denies the window_control command without any pre-configured scope."
+          "const": "autostart:default",
+          "markdownDescription": "This permission set configures if your\napplication can enable or disable auto\nstarting the application on boot.\n\n#### Granted Permissions\n\nIt allows all to check, enable and\ndisable the automatic start on boot.\n\n\n#### This default permission set includes:\n\n- `allow-enable`\n- `allow-disable`\n- `allow-is-enabled`"
+        },
+        {
+          "description": "Enables the disable command without any pre-configured scope.",
+          "type": "string",
+          "const": "autostart:allow-disable",
+          "markdownDescription": "Enables the disable command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the enable command without any pre-configured scope.",
+          "type": "string",
+          "const": "autostart:allow-enable",
+          "markdownDescription": "Enables the enable command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the is_enabled command without any pre-configured scope.",
+          "type": "string",
+          "const": "autostart:allow-is-enabled",
+          "markdownDescription": "Enables the is_enabled command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the disable command without any pre-configured scope.",
+          "type": "string",
+          "const": "autostart:deny-disable",
+          "markdownDescription": "Denies the disable command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the enable command without any pre-configured scope.",
+          "type": "string",
+          "const": "autostart:deny-enable",
+          "markdownDescription": "Denies the enable command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the is_enabled command without any pre-configured scope.",
+          "type": "string",
+          "const": "autostart:deny-is-enabled",
+          "markdownDescription": "Denies the is_enabled command without any pre-configured scope."
         },
         {
           "description": "Default core plugins set.\n#### This default permission set includes:\n\n- `core:path:default`\n- `core:event:default`\n- `core:window:default`\n- `core:webview:default`\n- `core:app:default`\n- `core:image:default`\n- `core:resources:default`\n- `core:menu:default`\n- `core:tray:default`",
