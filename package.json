@@ -6,7 +6,7 @@
     "dev": "tauri dev",
     "build": "tauri build",
     "tauri": "tauri",
-    "test": "node --test src-tauri/inject/ && cargo test --manifest-path src-tauri/Cargo.toml"
+    "test": "node --test src-tauri/inject/inject.test.mjs && cargo test --manifest-path src-tauri/Cargo.toml"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
