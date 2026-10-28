@@ -50,10 +50,9 @@
     let lastUnread;
     let theme = THEMES.includes(window.__PM_THEME__) ? window.__PM_THEME__ : "facebook";
     let modeCheckTimer;
-    // Facebook's own classes on <html>, put back when its setting is followed again.
-    const pageModeClasses = document.documentElement
-      ? Object.values(FB_MODE).filter(name => document.documentElement.classList.contains(name))
-      : [];
+    // Facebook's own mode classes on <html> from before a forced theme replaced them; they are put
+    // back once when its setting is followed again, after which Facebook manages them alone.
+    let pageModeClasses = null;
     const systemDark = typeof window.matchMedia === "function" ? window.matchMedia("(prefers-color-scheme: dark)") : null;
     const modeSheets = new WeakSet();
     // Facebook inlines the same variable rules more than once; keep each block once.
@@ -99,11 +98,13 @@
       const forced = theme !== "facebook";
       classes.toggle("pm-forced", forced);
       if (forced) {
+        if (!pageModeClasses) pageModeClasses = Object.values(FB_MODE).filter(name => classes.contains(name));
         const dark = wantsDark();
         classes.toggle(FB_MODE.dark, dark);
         classes.toggle(FB_MODE.light, !dark);
-      } else {
+      } else if (pageModeClasses) {
         for (const name of Object.values(FB_MODE)) classes.toggle(name, pageModeClasses.includes(name));
+        pageModeClasses = null;
       }
       classes.toggle("pm-dark", wantsDark());
     }

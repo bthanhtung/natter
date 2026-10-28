@@ -362,17 +362,26 @@ test('call buttons Facebook disables get the app hint and continue in the browse
 test('by default the page follows Facebook\'s own Dark mode, re-read after clicks', () => {
   const page = sandbox();
   page.htmlClasses.add('__fb-light-mode');
-  page.html.vars = { '--primary-text': '#E2E5E9' };
+  page.html.vars = { '--primary-text': '#080809' };
   page.evaluate();
-  assert.ok(page.htmlClasses.has('pm-theme-facebook') && page.htmlClasses.has('pm-dark'));
+  assert.ok(page.htmlClasses.has('pm-theme-facebook') && !page.htmlClasses.has('pm-dark'));
   assert.equal(page.htmlClasses.has('pm-forced'), false);
-  assert.ok(page.htmlClasses.has('__fb-light-mode') && !page.htmlClasses.has('__fb-dark-mode'));
-  page.html.vars = { '--primary-text': 'rgb(5, 5, 5)' };
+  // Facebook switches itself to dark; the app follows and leaves Facebook's classes alone.
+  page.htmlClasses.delete('__fb-light-mode');
+  page.htmlClasses.add('__fb-dark-mode');
+  page.html.vars = { '--primary-text': '#E2E5E9' };
   page.events.get('click')({ button: 2, target: null });
   page.flush();
-  assert.equal(page.htmlClasses.has('pm-dark'), false);
-  page.window.__PM_APPLY_THEME__('dark');
-  assert.ok(page.htmlClasses.has('pm-forced') && page.htmlClasses.has('__fb-dark-mode') && !page.htmlClasses.has('__fb-light-mode'));
+  assert.ok(page.htmlClasses.has('pm-dark') && page.htmlClasses.has('__fb-dark-mode') && !page.htmlClasses.has('__fb-light-mode'));
+  // A forced theme replaces them, and following Facebook again restores them once.
+  page.window.__PM_APPLY_THEME__('light');
+  assert.ok(page.htmlClasses.has('pm-forced') && page.htmlClasses.has('__fb-light-mode') && !page.htmlClasses.has('__fb-dark-mode'));
   page.window.__PM_APPLY_THEME__('facebook');
-  assert.ok(!page.htmlClasses.has('pm-forced') && page.htmlClasses.has('__fb-light-mode') && !page.htmlClasses.has('__fb-dark-mode'));
+  assert.ok(!page.htmlClasses.has('pm-forced') && page.htmlClasses.has('__fb-dark-mode') && !page.htmlClasses.has('__fb-light-mode'));
+  page.htmlClasses.delete('__fb-dark-mode');
+  page.htmlClasses.add('__fb-light-mode');
+  page.html.vars = { '--primary-text': '#080809' };
+  page.events.get('click')({ button: 2, target: null });
+  page.flush();
+  assert.ok(page.htmlClasses.has('__fb-light-mode') && !page.htmlClasses.has('__fb-dark-mode') && !page.htmlClasses.has('pm-dark'));
 });
