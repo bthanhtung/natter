@@ -66,7 +66,8 @@ html.pm-mac.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
   box-shadow: 0 0 0 .5px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .08) !important;
 }
 html.pm-mac.pm-dark.pm-active [role="navigation"]:not([aria-label="Facebook"]) { box-shadow: 0 0 0 .5px rgba(255, 255, 255, .1) !important; }
-/* The conversation, and the "no chat selected" panel shown before one is opened. */
+/* The conversation, its details panel, and the "no chat selected" panel shown before a chat is
+   opened. */
 html.pm-mac.pm-active [role="main"] > div > div:not(:has([role="region"])),
 html.pm-mac.pm-active [role="main"] > div > div > div > [role="region"] > div > div > div > div {
   margin: 8px !important;
@@ -75,6 +76,8 @@ html.pm-mac.pm-active [role="main"] > div > div > div > [role="region"] > div > 
   overflow: hidden !important;
   box-shadow: 0 0 0 .5px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .08) !important;
 }
+/* The conversation details panel sits next to the conversation: 8px between them, not 8 + 8. */
+html.pm-mac.pm-active [role="main"] > div > div > div > [role="region"] > div > div > div > div + div { margin-left: 0 !important; }
 html.pm-mac.pm-dark.pm-active [role="main"] > div > div:not(:has([role="region"])),
 html.pm-mac.pm-dark.pm-active [role="main"] > div > div > div > [role="region"] > div > div > div > div {
   box-shadow: 0 0 0 .5px rgba(255, 255, 255, .1) !important;
