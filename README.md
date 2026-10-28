@@ -1,8 +1,8 @@
-# PureMessenger
+# Pure Messenger
 
 A small, chat-only desktop app for Facebook Messenger on macOS, Windows and Linux, in the spirit of the former Messenger desktop app (discontinued by Meta in December 2025).
 
-PureMessenger shows Meta's own Messenger page (`facebook.com/messages`) in a native window and restyles it. It does not use unofficial APIs, scrape or automate anything, and it is not affiliated with or endorsed by Meta.
+Pure Messenger shows Meta's own Messenger page (`facebook.com/messages`) in a native window and restyles it. It does not use unofficial APIs, scrape or automate anything, and it is not affiliated with or endorsed by Meta.
 
 > Tiếng Việt: xem [Hướng dẫn nhanh](#hướng-dẫn-nhanh-tiếng-việt) ở cuối trang.
 
@@ -24,24 +24,24 @@ Builds are attached to [GitHub Releases](https://github.com/bthanhtung/pure-mess
 
 | System | File | Install |
 |---|---|---|
-| macOS 13+ (Apple silicon and Intel) | `PureMessenger_<version>_universal.dmg` | Open it and drag PureMessenger to Applications. |
-| Windows 10/11 (64-bit) | `PureMessenger_<version>_x64-setup.exe` | Run it. (`.msi` is also available.) |
-| Ubuntu / Debian (64-bit) | `PureMessenger_<version>_amd64.deb` | `sudo apt install ./PureMessenger_*_amd64.deb` |
-| Fedora (64-bit) | `PureMessenger-<version>-1.x86_64.rpm` | `sudo dnf install ./PureMessenger-*.x86_64.rpm` |
-| Other Linux (64-bit) | `PureMessenger_<version>_amd64.AppImage` | `chmod +x PureMessenger_*.AppImage`, then run it. |
+| macOS 13+ (Apple silicon and Intel) | `…_universal.dmg` | Open it and drag Pure Messenger to Applications. |
+| Windows 10/11 (64-bit) | `…_x64-setup.exe` | Run it. (`.msi` is also available.) |
+| Ubuntu / Debian (64-bit) | `…_amd64.deb` | `sudo apt install ./<file>.deb` |
+| Fedora (64-bit) | `…x86_64.rpm` | `sudo dnf install ./<file>.rpm` |
+| Other Linux (64-bit) | `…_amd64.AppImage` | `chmod +x <file>.AppImage`, then run it. |
 
 The builds are not code-signed, so the first launch shows a warning:
 
-- **macOS:** open System Settings → Privacy & Security and click **Open Anyway**. (Alternatively, run `xattr -cr /Applications/PureMessenger.app` once.)
+- **macOS:** open System Settings → Privacy & Security and click **Open Anyway**. (Alternatively, run `xattr -cr "/Applications/Pure Messenger.app"` once.)
 - **Windows:** in the SmartScreen dialog click **More info** → **Run anyway**.
 - **Linux:** an AppImage needs FUSE 2 (`libfuse2`, or `libfuse2t64` on Ubuntu 24.04). GNOME needs the AppIndicator extension to show the tray icon.
 
 ## Using it
 
 - Sign in with your Facebook account in the window. The session stays in the system webview's data folder on your computer.
-- **Preferences:** ⌘, on macOS (PureMessenger menu), Ctrl+, on Windows and Linux, or the tray menu.
+- **Preferences:** ⌘, on macOS (Pure Messenger menu), Ctrl+, on Windows and Linux, or the tray menu.
 - **Theme:** View → Appearance on macOS, or Appearance in the tray menu.
-- **Sign out:** PureMessenger → Sign Out… on macOS, Sign Out… in the tray menu, or Preferences → Account. You are asked to confirm first.
+- **Sign out:** Pure Messenger → Sign Out… on macOS, Sign Out… in the tray menu, or Preferences → Account. You are asked to confirm first.
 - **Tray menu:** Show, Appearance, Preferences, Sign Out…, Quit. On Linux use the tray menu to show the window; left-click does nothing there.
 
 | Preference | Effect |
@@ -50,7 +50,7 @@ The builds are not code-signed, so the first launch shows a warning:
 | Do not disturb | No desktop notifications |
 | Show previews | Show message text in notifications, or only "New message" |
 | Notification sounds | Play the system notification sound |
-| Open at login | Start PureMessenger when you sign in to your computer |
+| Open at login | Start Pure Messenger when you sign in to your computer |
 | Keep running when closed | Closing the window hides it to the tray instead of quitting |
 | Glass effect (macOS) | Translucent window; uses more graphics power; applies after restarting the app |
 | Sign out of Facebook | Removes the Facebook session from this computer (click twice to confirm) |
@@ -104,7 +104,7 @@ Themes work by reading Facebook's own light and dark color variables from the pa
 
 ## Privacy and security
 
-- PureMessenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the system webview's data folder. No cookies or session values are logged or sent anywhere.
+- Pure Messenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the system webview's data folder. No cookies or session values are logged or sent anywhere.
 - The Messenger page can call only `core:window:allow-start-dragging`, `core:window:allow-internal-toggle-maximize` and six app commands (`set_unread`, `notify`, `get_theme`, `open_preferences`, `open_external`, which opens only http(s) URLs in the browser, and `call_in_browser`, which accepts only Facebook chat URLs). It cannot read or change other preferences; only the bundled Preferences window can.
 - These permissions apply only to HTTPS Facebook origins. Other sites and non-chat Facebook pages open in the default browser.
 - Sign-in checks stay in the app window, so they verify the session you are signing in to: Meta's account pages and the reCAPTCHA, hCaptcha and Arkose challenge frames Facebook embeds are allowed there.
@@ -122,7 +122,7 @@ Themes work by reading Facebook's own light and dark color variables from the pa
 
 ## License
 
-[PolyForm Noncommercial 1.0.0](LICENSE). You may use, copy, modify and share PureMessenger for any noncommercial purpose, such as personal use, study, or use by charities and educational institutions. Commercial use is not permitted. Keep the `Required Notice` line from the [LICENSE](LICENSE) file when you share it.
+[PolyForm Noncommercial 1.0.0](LICENSE). You may use, copy, modify and share Pure Messenger for any noncommercial purpose, such as personal use, study, or use by charities and educational institutions. Commercial use is not permitted. Keep the `Required Notice` line from the [LICENSE](LICENSE) file when you share it.
 
 Messenger and Facebook are trademarks of Meta Platforms, Inc.
 
@@ -130,18 +130,18 @@ Messenger and Facebook are trademarks of Meta Platforms, Inc.
 
 **Tải bản cài** ở mục [Releases](https://github.com/bthanhtung/pure-messenger/releases):
 
-- **macOS:** tải file `.dmg`, mở ra rồi kéo PureMessenger vào Applications. Lần đầu mở bị chặn thì vào System Settings → Privacy & Security, bấm **Open Anyway**.
+- **macOS:** tải file `.dmg`, mở ra rồi kéo Pure Messenger vào Applications. Lần đầu mở bị chặn thì vào System Settings → Privacy & Security, bấm **Open Anyway**.
 - **Windows:** tải file `..._x64-setup.exe` rồi chạy. Nếu SmartScreen cảnh báo, bấm **More info** → **Run anyway**.
-- **Ubuntu/Debian:** tải file `.deb`, chạy `sudo apt install ./PureMessenger_*_amd64.deb`.
-- **Fedora:** tải file `.rpm`, chạy `sudo dnf install ./PureMessenger-*.x86_64.rpm`.
-- **Linux khác:** tải file `.AppImage`, chạy `chmod +x PureMessenger_*.AppImage` rồi mở.
+- **Ubuntu/Debian:** tải file `.deb`, chạy `sudo apt install ./<tên file>.deb`.
+- **Fedora:** tải file `.rpm`, chạy `sudo dnf install ./<tên file>.rpm`.
+- **Linux khác:** tải file `.AppImage`, chạy `chmod +x <tên file>.AppImage` rồi mở.
 
 **Sử dụng:**
 
 - Đăng nhập Facebook trong cửa sổ app. App không lưu tin nhắn.
 - Giao diện sáng/tối mặc định theo cài đặt Chế độ tối của Facebook. Muốn ép theo macOS hay luôn sáng/tối thì chọn ở menu View → Appearance (macOS) hoặc menu ở khay hệ thống.
 - Cài đặt (thông báo, tự mở khi khởi động máy…): ⌘, trên macOS, Ctrl+, trên Windows/Linux.
-- Đăng xuất: menu PureMessenger → Sign Out… (macOS), hoặc Sign Out… trong menu ở khay hệ thống.
+- Đăng xuất: menu Pure Messenger → Sign Out… (macOS), hoặc Sign Out… trong menu ở khay hệ thống.
 - Link profile, bài viết… sẽ mở bằng trình duyệt, app chỉ dùng để chat.
 
 **Giấy phép:** được dùng, sửa và chia sẻ miễn phí cho mục đích phi thương mại. Không được dùng vào mục đích thương mại.

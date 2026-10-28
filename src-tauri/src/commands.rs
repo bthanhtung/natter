@@ -100,9 +100,9 @@ pub fn set_unread(
         ));
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         let _ = tray.set_tooltip(Some(if count > 0 {
-            format!("PureMessenger — {count} unread")
+            format!("Pure Messenger — {count} unread")
         } else {
-            "PureMessenger".to_owned()
+            "Pure Messenger".to_owned()
         }));
     }
     Ok(())
@@ -209,7 +209,7 @@ pub fn confirm_sign_out(app: &tauri::AppHandle) {
     let handle = app.clone();
     let dialog = app
         .dialog()
-        .message("You will need to sign in to Facebook again to use PureMessenger.")
+        .message("You will need to sign in to Facebook again to use Pure Messenger.")
         .title("Sign out of Facebook?")
         .kind(MessageDialogKind::Warning)
         .buttons(MessageDialogButtons::OkCancelCustom(
