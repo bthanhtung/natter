@@ -48,7 +48,8 @@ html.pm-dark.pm-active [role="main"] > div > div { border-left-color: rgba(255, 
    which keeps scrolling and animation as cheap as possible. */
 html.pm-mac:not(.pm-active) body { padding-top: 28px !important; box-sizing: border-box; }
 html.pm-mac.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
-  margin: 8px !important;
+  /* No gap on the conversation side: the panel sits right against it. */
+  margin: 8px 0 8px 8px !important;
   height: calc(100% - 16px) !important;
   padding-top: 24px !important;
   box-sizing: border-box !important;
