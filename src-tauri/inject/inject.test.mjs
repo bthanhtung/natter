@@ -97,7 +97,7 @@ function sandbox({ host = 'www.facebook.com', path = '/messages', platform = 'wi
   const context = vm.createContext({
     window, document, location, history, MutationObserver, EventTarget,
     Promise, Number, String, URL,
-    getComputedStyle: element => ({ fontWeight: element.weight || '400' }),
+    getComputedStyle: element => ({ fontWeight: element.weight || '400', getPropertyValue: name => (element.vars && element.vars[name]) || '' }),
     setTimeout(callback) { const id = ++timerId; timers.set(id, callback); return id; },
     clearTimeout(id) { timers.delete(id); }
   });
@@ -279,7 +279,7 @@ test('themes set the page mode classes; a saved theme replaces the injected one'
   page.window.__PM_APPLY_THEME__('<script>');
   assert.ok(page.htmlClasses.has('pm-theme-high_contrast'));
 
-  const system = sandbox({ systemDark: true, savedTheme: 'light' });
+  const system = sandbox({ theme: 'system', systemDark: true, savedTheme: 'light' });
   system.evaluate();
   assert.ok(system.htmlClasses.has('pm-theme-system') && system.htmlClasses.has('pm-dark'));
   await Promise.resolve();
@@ -298,7 +298,7 @@ test('Facebook mode variables are mirrored once, deduplicated, and extended by l
   );
   page.evaluate();
   const style = page.document.getElementById('pm-mode');
-  assert.equal(style.textContent, 'html.pm-dark:root,html.pm-dark .__fb-light-mode{--a: black;}html:not(.pm-dark):root,html:not(.pm-dark) .__fb-dark-mode{--a: white;}');
+  assert.equal(style.textContent, 'html.pm-forced.pm-dark:root,html.pm-forced.pm-dark .__fb-light-mode{--a: black;}html.pm-forced:not(.pm-dark):root,html.pm-forced:not(.pm-dark) .__fb-dark-mode{--a: white;}');
   page.mutateHead([{ addedNodes: [{ nodeName: 'STYLE', textContent: '.__fb-dark-mode', sheet: { cssRules: [rule('.__fb-dark-mode', '--b: gray;')] } }], removedNodes: [] }]);
   assert.match(style.textContent, /\{--a: black;--b: gray;\}/);
   page.mutateHead([{ addedNodes: [{ nodeName: 'LINK' }], removedNodes: [] }]);
@@ -357,4 +357,22 @@ test('call buttons Facebook disables get the app hint and continue in the browse
   const winClick = { button: 0, target, prevented: false, preventDefault() { this.prevented = true; }, stopImmediatePropagation() {} };
   windows.events.get('click')(winClick);
   assert.equal(winClick.prevented, false);
+});
+
+test('by default the page follows Facebook\'s own Dark mode, re-read after clicks', () => {
+  const page = sandbox();
+  page.htmlClasses.add('__fb-light-mode');
+  page.html.vars = { '--primary-text': '#E2E5E9' };
+  page.evaluate();
+  assert.ok(page.htmlClasses.has('pm-theme-facebook') && page.htmlClasses.has('pm-dark'));
+  assert.equal(page.htmlClasses.has('pm-forced'), false);
+  assert.ok(page.htmlClasses.has('__fb-light-mode') && !page.htmlClasses.has('__fb-dark-mode'));
+  page.html.vars = { '--primary-text': 'rgb(5, 5, 5)' };
+  page.events.get('click')({ button: 2, target: null });
+  page.flush();
+  assert.equal(page.htmlClasses.has('pm-dark'), false);
+  page.window.__PM_APPLY_THEME__('dark');
+  assert.ok(page.htmlClasses.has('pm-forced') && page.htmlClasses.has('__fb-dark-mode') && !page.htmlClasses.has('__fb-light-mode'));
+  page.window.__PM_APPLY_THEME__('facebook');
+  assert.ok(!page.htmlClasses.has('pm-forced') && page.htmlClasses.has('__fb-light-mode') && !page.htmlClasses.has('__fb-dark-mode'));
 });

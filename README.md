@@ -11,7 +11,7 @@ PureMessenger shows Meta's own Messenger page (`facebook.com/messages`) in a nat
 - **Chat only.** The window shows your chats, their media viewer and the sign-in steps, nothing else. Profiles, posts, groups and every other link open in your default browser, and Facebook's home feed is replaced by the chats.
 - **Desktop look.** Full-height panes with no page scrollbars or Facebook header. On macOS the title bar blends into the window and the chat list floats as a rounded panel, after Apple's macOS 26 design. An optional glass window (Liquid Glass on macOS 26 and later, the translucent sidebar material earlier) can be turned on in Preferences.
 - **Light and fast.** The app adds no work while you scroll, type or hover: themes are plain CSS, and the unread count runs only when Facebook retitles the page, at idle time.
-- **Themes.** System, Light, Grey, Dark (true black) and High contrast, applied to the whole page and window without a reload.
+- **Themes.** By default the app follows Facebook's own Dark mode setting (Off, On or Automatic). System, Light, Grey, Dark (true black) and High contrast override it, applied to the whole page without a reload.
 - **Unread badge** on the Dock or taskbar and the tray, counting unread conversations (not Facebook notifications).
 - **Files, photos and GIFs.** Send them with the attach button, by dragging them onto the window, or by pasting. Attachments you download are saved to your Downloads folder, with a notification when they finish.
 - **Native notifications** with Do not disturb, hidden previews and sound options.
@@ -46,7 +46,7 @@ The builds are not code-signed, so the first launch shows a warning:
 
 | Preference | Effect |
 |---|---|
-| Theme | System, Light, Grey, Dark, High contrast |
+| Theme | Match Facebook (default: Facebook's own Dark mode setting), System, Light, Grey, Dark, High contrast |
 | Do not disturb | No desktop notifications |
 | Show previews | Show message text in notifications, or only "New message" |
 | Notification sounds | Play the system notification sound |
@@ -138,7 +138,7 @@ Messenger and Facebook are trademarks of Meta Platforms, Inc.
 **Sử dụng:**
 
 - Đăng nhập Facebook trong cửa sổ app. App không lưu tin nhắn.
-- Đổi giao diện sáng/tối: menu View → Appearance (macOS) hoặc menu ở khay hệ thống.
+- Giao diện sáng/tối mặc định theo cài đặt Chế độ tối của Facebook. Muốn ép theo macOS hay luôn sáng/tối thì chọn ở menu View → Appearance (macOS) hoặc menu ở khay hệ thống.
 - Cài đặt (thông báo, tự mở khi khởi động máy…): ⌘, trên macOS, Ctrl+, trên Windows/Linux.
 - Đăng xuất: menu PureMessenger → Sign Out… (macOS), hoặc Sign Out… trong menu ở khay hệ thống.
 - Link profile, bài viết… sẽ mở bằng trình duyệt, app chỉ dùng để chat.

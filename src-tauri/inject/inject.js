@@ -31,7 +31,8 @@
   const FB_MODE = { dark: "__fb-dark-mode", light: "__fb-light-mode" };
   const LIGHT_RULE = /^:root\s*,.*\.__fb-light-mode$/;
   const DARK_RULE = /^\.__fb-dark-mode$/;
-  const THEMES = ["system", "light", "grey", "dark", "high_contrast"];
+  // "facebook" follows Facebook's own Dark mode setting; the others override it.
+  const THEMES = ["facebook", "system", "light", "grey", "dark", "high_contrast"];
 
   try {
     if (window.top !== window || !/^(?:facebook\.com|.+\.facebook\.com)$/i.test(location.hostname) || window.__PM_INIT__) return;
@@ -47,7 +48,12 @@
     let unreadTimer;
     let pageModeTimer;
     let lastUnread;
-    let theme = THEMES.includes(window.__PM_THEME__) ? window.__PM_THEME__ : "system";
+    let theme = THEMES.includes(window.__PM_THEME__) ? window.__PM_THEME__ : "facebook";
+    let modeCheckTimer;
+    // Facebook's own classes on <html>, put back when its setting is followed again.
+    const pageModeClasses = document.documentElement
+      ? Object.values(FB_MODE).filter(name => document.documentElement.classList.contains(name))
+      : [];
     const systemDark = typeof window.matchMedia === "function" ? window.matchMedia("(prefers-color-scheme: dark)") : null;
     const modeSheets = new WeakSet();
     // Facebook inlines the same variable rules more than once; keep each block once.
@@ -67,19 +73,49 @@
       return undefined;
     }
 
+    // Facebook's text color tells its current mode: light text means dark mode.
+    function facebookIsDark() {
+      const element = document.querySelector(SELECTORS.chat) || document.documentElement;
+      const color = element ? getComputedStyle(element).getPropertyValue("--primary-text").trim() : "";
+      const hex = /^#([0-9a-f]{6})$/i.exec(color);
+      const rgb = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/i.exec(color);
+      const channels = hex
+        ? [0, 2, 4].map(index => parseInt(hex[1].slice(index, index + 2), 16))
+        : rgb ? rgb.slice(1, 4).map(Number) : null;
+      if (!channels) return !!(systemDark && systemDark.matches);
+      return (channels[0] * 299 + channels[1] * 587 + channels[2] * 114) / 1000 > 128;
+    }
+
     function wantsDark() {
       if (theme === "grey" || theme === "dark") return true;
       if (theme === "system") return !!(systemDark && systemDark.matches);
+      if (theme === "facebook") return facebookIsDark();
       return false;
     }
 
     function enforceMode() {
       const classes = document.documentElement && document.documentElement.classList;
       if (!classes) return;
-      const dark = wantsDark();
-      classes.toggle("pm-dark", dark);
-      classes.toggle(FB_MODE.dark, dark);
-      classes.toggle(FB_MODE.light, !dark);
+      const forced = theme !== "facebook";
+      classes.toggle("pm-forced", forced);
+      if (forced) {
+        const dark = wantsDark();
+        classes.toggle(FB_MODE.dark, dark);
+        classes.toggle(FB_MODE.light, !dark);
+      } else {
+        for (const name of Object.values(FB_MODE)) classes.toggle(name, pageModeClasses.includes(name));
+      }
+      classes.toggle("pm-dark", wantsDark());
+    }
+
+    // Following Facebook, its mode can only change after a click (its Dark mode menu) or a new
+    // page title; one style read then, nothing while idle.
+    function scheduleModeCheck() {
+      if (theme !== "facebook" || modeCheckTimer) return;
+      modeCheckTimer = setTimeout(() => {
+        modeCheckTimer = undefined;
+        enforceMode();
+      }, 400);
     }
 
     function addModeSheet(sheet) {
@@ -115,8 +151,8 @@
       // nothing has to watch the DOM and new containers never flash the other mode. The root
       // selectors outrank Facebook's `.__fb-light-mode:root`, whatever its Dark mode setting.
       style.textContent =
-        `html.pm-dark:root,html.pm-dark .${FB_MODE.light}{${[...modeDeclarations.dark].join("")}}` +
-        `html:not(.pm-dark):root,html:not(.pm-dark) .${FB_MODE.dark}{${[...modeDeclarations.light].join("")}}`;
+        `html.pm-forced.pm-dark:root,html.pm-forced.pm-dark .${FB_MODE.light}{${[...modeDeclarations.dark].join("")}}` +
+        `html.pm-forced:not(.pm-dark):root,html.pm-forced:not(.pm-dark) .${FB_MODE.dark}{${[...modeDeclarations.light].join("")}}`;
     }
 
     function isModeStyle(node) {
@@ -224,6 +260,7 @@
     function interceptLinks() {
       // Capture phase, so Facebook's router never sees clicks that leave the chat.
       window.addEventListener("click", event => {
+        scheduleModeCheck();
         if (event.button !== 0) return;
         const target = event.target;
         if (blockedCallButton(target)) {
@@ -259,6 +296,7 @@
         bodyObserver.disconnect();
         bodyObserver = undefined;
         scheduleUnread();
+        scheduleModeCheck();
       }
     }
 
@@ -338,7 +376,10 @@
       titleElement = title;
       if (titleObserver) titleObserver.disconnect();
       if (title) {
-        titleObserver = titleObserver || new MutationObserver(scheduleUnread);
+        titleObserver = titleObserver || new MutationObserver(() => {
+          scheduleUnread();
+          scheduleModeCheck();
+        });
         titleObserver.observe(title, { childList: true, characterData: true, subtree: true });
       }
       scheduleUnread();
@@ -463,6 +504,7 @@
       }
       clearTimeout(unreadTimer);
       clearTimeout(pageModeTimer);
+      clearTimeout(modeCheckTimer);
     });
 
     // The initialization script is fixed at window creation; ask for the theme saved since then.

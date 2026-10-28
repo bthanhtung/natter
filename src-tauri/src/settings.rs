@@ -16,7 +16,9 @@ use tauri::{
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ThemeChoice {
+    /// Follows Facebook's own Dark mode setting.
     #[default]
+    Facebook,
     System,
     Light,
     Grey,
@@ -24,7 +26,8 @@ pub enum ThemeChoice {
     HighContrast,
 }
 
-pub const THEMES: [(ThemeChoice, &str); 5] = [
+pub const THEMES: [(ThemeChoice, &str); 6] = [
+    (ThemeChoice::Facebook, "Match Facebook"),
     (ThemeChoice::System, "System"),
     (ThemeChoice::Light, "Light"),
     (ThemeChoice::Grey, "Grey"),
@@ -53,7 +56,7 @@ impl ThemeChoice {
     /// The native window appearance; `None` follows the operating system.
     pub fn native(self) -> Option<Theme> {
         match self {
-            Self::System => None,
+            Self::Facebook | Self::System => None,
             Self::Light | Self::HighContrast => Some(Theme::Light),
             Self::Grey | Self::Dark => Some(Theme::Dark),
         }
@@ -70,17 +73,23 @@ pub struct Settings {
     pub close_to_tray: bool,
     /// macOS only: a translucent glass window. Read when the window is created.
     pub glass: bool,
+    /// Settings format; files from before version 1 saved "system" as the default theme.
+    #[serde(default)]
+    pub version: u32,
 }
+
+const SETTINGS_VERSION: u32 = 1;
 
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            theme: ThemeChoice::System,
+            theme: ThemeChoice::Facebook,
             do_not_disturb: false,
             show_previews: true,
             sounds: true,
             close_to_tray: true,
             glass: false,
+            version: SETTINGS_VERSION,
         }
     }
 }
@@ -91,7 +100,14 @@ pub struct SettingsStore {
 }
 
 fn parse(contents: &str) -> Settings {
-    serde_json::from_str(contents).unwrap_or_default()
+    let mut settings: Settings = serde_json::from_str(contents).unwrap_or_default();
+    // Before version 1 the default theme was "system" and was saved with any other change; the
+    // default is now to follow Facebook's own Dark mode.
+    if settings.version < 1 && settings.theme == ThemeChoice::System {
+        settings.theme = ThemeChoice::Facebook;
+    }
+    settings.version = SETTINGS_VERSION;
+    settings
 }
 
 impl SettingsStore {
@@ -119,7 +135,8 @@ impl SettingsStore {
             .unwrap_or_default()
     }
 
-    pub fn replace(&self, settings: Settings) -> Result<(), String> {
+    pub fn replace(&self, mut settings: Settings) -> Result<(), String> {
+        settings.version = SETTINGS_VERSION;
         if let Some(path) = &self.path {
             if let Some(dir) = path.parent() {
                 fs::create_dir_all(dir).map_err(|_| "settings directory unavailable")?;
@@ -212,8 +229,8 @@ fn chrome_color(theme: ThemeChoice, system_dark: bool) -> Color {
         ThemeChoice::Light | ThemeChoice::HighContrast => Color(255, 255, 255, 255),
         ThemeChoice::Grey => Color(36, 37, 38, 255),
         ThemeChoice::Dark => Color(0, 0, 0, 255),
-        ThemeChoice::System if system_dark => Color(36, 37, 38, 255),
-        ThemeChoice::System => Color(255, 255, 255, 255),
+        ThemeChoice::Facebook | ThemeChoice::System if system_dark => Color(36, 37, 38, 255),
+        ThemeChoice::Facebook | ThemeChoice::System => Color(255, 255, 255, 255),
     }
 }
 
@@ -281,9 +298,19 @@ mod tests {
     }
 
     #[test]
+    fn old_files_move_from_the_old_system_default_to_facebook() {
+        assert_eq!(parse(r#"{"theme":"system"}"#).theme, ThemeChoice::Facebook);
+        assert_eq!(parse(r#"{"theme":"dark"}"#).theme, ThemeChoice::Dark);
+        assert_eq!(
+            parse(r#"{"theme":"system","version":1}"#).theme,
+            ThemeChoice::System
+        );
+    }
+
+    #[test]
     fn serializes_for_the_preferences_page() {
         let json = serde_json::to_value(Settings::default()).expect("settings serialize");
-        assert_eq!(json["theme"], "system");
+        assert_eq!(json["theme"], "facebook");
         assert_eq!(json["doNotDisturb"], false);
         assert_eq!(json["closeToTray"], true);
     }

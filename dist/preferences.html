@@ -27,13 +27,15 @@
   h2 { margin: 18px 4px 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
   h2:first-child { margin-top: 0; }
   .card { background: var(--card); border-radius: 10px; padding: 4px 14px; }
-  .themes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; padding: 12px 0 10px; }
+  .themes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 12px 0 10px; }
   .themes label { display: grid; justify-items: center; gap: 6px; font-size: 12px; text-align: center; cursor: pointer; }
   .themes input { position: absolute; opacity: 0; pointer-events: none; }
   .swatch { width: 100%; aspect-ratio: 1; border-radius: 10px; border: 2px solid var(--line); display: grid; place-items: center; overflow: hidden; }
   .swatch i { width: 60%; height: 22%; border-radius: 999px; }
   .themes input:checked + .swatch { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
   .themes input:focus-visible + .swatch { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .s-facebook { background: linear-gradient(135deg, #fff 50%, #242526 50%); }
+  .s-facebook i { background: #0866ff; width: 34%; height: 34%; border-radius: 50%; }
   .s-system { background: linear-gradient(135deg, #fff 50%, #242526 50%); }
   .s-system i { background: #0866ff; }
   .s-light { background: #fff; } .s-light i { background: #e4e6eb; }
@@ -62,6 +64,7 @@
   <h2>Appearance</h2>
   <div class="card">
     <div class="themes" role="radiogroup" aria-label="Theme">
+      <label><input type="radio" name="theme" value="facebook"><span class="swatch s-facebook"><i></i></span>Facebook</label>
       <label><input type="radio" name="theme" value="system"><span class="swatch s-system"><i></i></span>System</label>
       <label><input type="radio" name="theme" value="light"><span class="swatch s-light"><i></i></span>Light</label>
       <label><input type="radio" name="theme" value="grey"><span class="swatch s-grey"><i></i></span>Grey</label>
@@ -112,7 +115,7 @@
   function collect() {
     return {
       settings: {
-        theme: form.elements.theme.value || "system",
+        theme: form.elements.theme.value || "facebook",
         doNotDisturb: form.elements.doNotDisturb.checked,
         showPreviews: form.elements.showPreviews.checked,
         sounds: form.elements.sounds.checked,
