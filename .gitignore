@@ -1,0 +1,6 @@
+node_modules/
+.npm-cache/
+src-tauri/target/
+.cargo-home/
+dist/*
+!dist/index.html
