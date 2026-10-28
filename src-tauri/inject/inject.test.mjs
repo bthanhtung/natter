@@ -298,7 +298,7 @@ test('Facebook mode variables are mirrored once, deduplicated, and extended by l
   );
   page.evaluate();
   const style = page.document.getElementById('pm-mode');
-  assert.equal(style.textContent, 'html.pm-dark,html.pm-dark .__fb-light-mode{--a: black;}html:not(.pm-dark) .__fb-dark-mode{--a: white;}');
+  assert.equal(style.textContent, 'html.pm-dark:root,html.pm-dark .__fb-light-mode{--a: black;}html:not(.pm-dark):root,html:not(.pm-dark) .__fb-dark-mode{--a: white;}');
   page.mutateHead([{ addedNodes: [{ nodeName: 'STYLE', textContent: '.__fb-dark-mode', sheet: { cssRules: [rule('.__fb-dark-mode', '--b: gray;')] } }], removedNodes: [] }]);
   assert.match(style.textContent, /\{--a: black;--b: gray;\}/);
   page.mutateHead([{ addedNodes: [{ nodeName: 'LINK' }], removedNodes: [] }]);

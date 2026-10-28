@@ -112,10 +112,11 @@
         document.documentElement.appendChild(style);
       }
       // Containers pinned to the account's mode take the chosen mode's variables from CSS, so
-      // nothing has to watch the DOM and new containers never flash the other mode.
+      // nothing has to watch the DOM and new containers never flash the other mode. The root
+      // selectors outrank Facebook's `.__fb-light-mode:root`, whatever its Dark mode setting.
       style.textContent =
-        `html.pm-dark,html.pm-dark .${FB_MODE.light}{${[...modeDeclarations.dark].join("")}}` +
-        `html:not(.pm-dark) .${FB_MODE.dark}{${[...modeDeclarations.light].join("")}}`;
+        `html.pm-dark:root,html.pm-dark .${FB_MODE.light}{${[...modeDeclarations.dark].join("")}}` +
+        `html:not(.pm-dark):root,html:not(.pm-dark) .${FB_MODE.dark}{${[...modeDeclarations.light].join("")}}`;
     }
 
     function isModeStyle(node) {
