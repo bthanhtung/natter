@@ -29,7 +29,9 @@ html::-webkit-scrollbar { display: none !important; width: 0 !important; height:
 /* Messenger fills the window and its panes scroll themselves; the page never should. */
 html.pm-active, html.pm-active body { overflow: hidden !important; }
 html.pm-active body, html.pm-active [role="main"] { margin-top: 0 !important; }
-/* Flush panes like the desktop app: the conversation is not a floating card with gutters. */
+/* Flush panes like the desktop app: the conversation is not a floating card with gutters, and
+   Facebook's 16px inset between the list and the conversation is dropped. */
+html.pm-active [role="main"] [role="region"] > div > div > div > div { margin-left: 0 !important; }
 html.pm-active div:has(> [role="main"]) { padding-right: 0 !important; }
 html.pm-active [role="main"] > div { padding-top: 0 !important; }
 html.pm-active [role="main"] > div > div {
@@ -60,10 +62,12 @@ html.pm-mac.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
 }
 html.pm-mac.pm-dark.pm-active [role="navigation"]:not([aria-label="Facebook"]) { box-shadow: 0 0 0 .5px rgba(255, 255, 255, .1) !important; }
 html.pm-mac.pm-active [role="main"] > div > div {
-  padding-top: 28px !important;
-  box-sizing: border-box !important;
+  padding-top: 0 !important;
   border-left: 0 !important;
 }
+/* The traffic lights sit over the chat list, so only that part of the top edge is a drag strip
+   and the conversation header can start at the very top. */
+html.pm-mac.pm-active #pm-drag { right: auto; width: 376px; }
 
 /* Optional glass (Preferences): the window is the glass material (Liquid Glass on macOS 26, the
    sidebar material earlier) and shows through the page and the chat panel. It costs GPU time on
