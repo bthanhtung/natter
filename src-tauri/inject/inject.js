@@ -13,7 +13,10 @@
     // Login form signals that chrome removal must be disabled.
     loginForm: 'form[action*="login"], input[name="pass"]',
     // Messenger's own layout; once it is on screen the login form check can stop.
-    chat: '[role="main"]'
+    chat: '[role="main"]',
+    // The conversation list and its rows; a row with bold text is unread.
+    chatList: '[role="navigation"]:not([aria-label="Facebook"])',
+    chatRow: 'a[role="link"][href*="/t/"]'
   };
 
   // The window is chat-only: other Facebook pages open in the default browser.
@@ -36,6 +39,8 @@
 
     let titleObserver;
     let titleElement;
+    let listObserver;
+    let listElement;
     let headObserver;
     let bodyObserver;
     let chatShown = false;
@@ -186,6 +191,7 @@
         chatShown = true;
         bodyObserver.disconnect();
         bodyObserver = undefined;
+        scheduleUnread();
       }
     }
 
@@ -215,12 +221,37 @@
       document.documentElement.appendChild(strip);
     }
 
+    function isUnread(row) {
+      for (const span of row.getElementsByTagName("span")) {
+        if (!span.firstElementChild && span.textContent && Number(getComputedStyle(span).fontWeight) >= 600) return true;
+      }
+      return false;
+    }
+
+    // The page title's "(N)" also counts Facebook notifications such as friend requests, so the
+    // badge counts unread conversations in the chat list instead.
     function unreadCount() {
-      const match = /^\((\d+)\+?\)/.exec(document.title);
-      return match ? Math.min(Number(match[1]), 9999) : 0;
+      if (!listElement) return 0;
+      let count = 0;
+      for (const row of listElement.querySelectorAll(SELECTORS.chatRow)) {
+        if (isUnread(row)) count++;
+      }
+      return Math.min(count, 9999);
+    }
+
+    function watchList() {
+      const list = document.querySelector(SELECTORS.chatList);
+      if (list === listElement) return;
+      listElement = list;
+      if (listObserver) listObserver.disconnect();
+      if (!list) return;
+      listObserver = listObserver || new MutationObserver(scheduleUnread);
+      listObserver.observe(list, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class"] });
     }
 
     function sendUnread() {
+      unreadTimer = undefined;
+      watchList();
       const count = unreadCount();
       if (count !== lastUnread) {
         lastUnread = count;
@@ -229,8 +260,9 @@
     }
 
     function scheduleUnread() {
-      clearTimeout(unreadTimer);
-      unreadTimer = setTimeout(sendUnread, 500);
+      // Throttled: hovering the list changes classes continuously.
+      if (unreadTimer) return;
+      unreadTimer = setTimeout(sendUnread, 700);
     }
 
     function observeTitle() {
@@ -358,7 +390,7 @@
     }
     window.addEventListener("popstate", pageMode);
     window.addEventListener("pagehide", () => {
-      for (const observer of [titleObserver, headObserver, bodyObserver]) {
+      for (const observer of [titleObserver, headObserver, bodyObserver, listObserver]) {
         if (observer) observer.disconnect();
       }
       clearTimeout(unreadTimer);

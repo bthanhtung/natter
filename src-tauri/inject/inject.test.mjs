@@ -20,7 +20,7 @@ function sandbox({ host = 'www.facebook.com', path = '/messages', platform = 'wi
     replace(url) { this.replaced.push(url); }
   };
   let backs = 0;
-  const page = { loginVisible: false, chatVisible: false };
+  const page = { loginVisible: false, chatVisible: false, list: null };
   const styleSheets = [];
 
   class Element {
@@ -64,6 +64,7 @@ function sandbox({ host = 'www.facebook.com', path = '/messages', platform = 'wi
     querySelector: selector => {
       if (page.loginVisible && selector.includes('input[name="pass"]')) return {};
       if (page.chatVisible && selector === '[role="main"]') return {};
+      if (selector.startsWith('[role="navigation"]')) return page.list;
       return null;
     },
     getElementById: id => elements.find(element => element.id === id) || null,
@@ -94,6 +95,7 @@ function sandbox({ host = 'www.facebook.com', path = '/messages', platform = 'wi
   const context = vm.createContext({
     window, document, location, history, MutationObserver, EventTarget,
     Promise, Number, String, URL,
+    getComputedStyle: element => ({ fontWeight: element.weight || '400' }),
     setTimeout(callback) { const id = ++timerId; timers.set(id, callback); return id; },
     clearTimeout(id) { timers.delete(id); }
   });
@@ -124,21 +126,26 @@ test('only top-level Facebook initializes and repeated injection is idempotent',
   assert.match(page.document.getElementById('pm-style').textContent, /html\.pm-active \[role="region"\]\[aria-label="Tin" i\]/);
 });
 
-test('title changes debounce and only send changed counts', () => {
-  const page = sandbox({ title: '(3) Messenger' });
+test('the badge counts unread chat rows, not the title, and only sends changes', () => {
+  const page = sandbox({ title: '(2) Messenger | Facebook' });
+  const span = (text, weight) => ({ firstElementChild: null, textContent: text, weight });
+  const row = (...spans) => ({ getElementsByTagName: () => spans });
+  const rows = [row(span('Alice', '400'), span('hi', '400'))];
+  page.page.list = { querySelectorAll: () => rows };
   page.evaluate();
   page.flush();
-  page.mutateTitle('(12+) Facebook');
-  page.mutateTitle('(12+) Facebook');
+  rows.push(row(span('Bob', '700'), span('new', '700')), row(span('', '700'), { firstElementChild: {}, textContent: 'x', weight: '700' }));
+  const listObserver = () => page.observers.find(observer => observer.target === page.page.list);
+  listObserver().callback();
+  listObserver().callback();
   page.flush();
-  page.mutateTitle('Messenger');
+  rows.splice(1);
+  page.mutateTitle('(5) Messenger | Facebook');
   page.flush();
-  page.mutateTitle('Messenger');
+  page.mutateTitle('(6) Messenger | Facebook');
   page.flush();
-  page.mutateTitle('(123456789012) Messenger');
-  page.flush();
-  assert.deepEqual(page.calls.filter(call => call.command === 'set_unread').map(call => call.args.count), [3, 12, 0, 9999]);
-  assert.equal(page.observers.filter(observer => observer.target).length, 3);
+  assert.deepEqual(page.calls.filter(call => call.command === 'set_unread').map(call => call.args.count), [0, 1, 0]);
+  assert.equal(page.observers.filter(observer => observer.target).length, 4);
   page.events.get('pagehide')();
   assert.equal(page.observers.filter(observer => observer.target).length, 0);
 });

@@ -1,52 +1,136 @@
 # PureMessenger
 
-## What it is
+A small, chat-only desktop app for Facebook Messenger on macOS, Windows and Linux, in the spirit of the former Messenger desktop app (discontinued by Meta in December 2025).
 
-PureMessenger is a personal-use desktop wrapper around `https://www.facebook.com/messages/`. It is not affiliated with or endorsed by Meta. It does not scrape or automate Messenger.
+PureMessenger shows Meta's own Messenger page (`facebook.com/messages`) in a native window and restyles it. It does not use unofficial APIs, scrape or automate anything, and it is not affiliated with or endorsed by Meta.
+
+> Tiếng Việt: xem [Hướng dẫn nhanh](#hướng-dẫn-nhanh-tiếng-việt) ở cuối trang.
 
 ## Features
 
-- A focused Messenger window with close-to-tray behavior and a Show/Preferences/Quit tray menu. The title bar is native (transparent and theme-colored on macOS), so Messenger fills the window without page scrollbars.
-- Unread indicator on the tray and supported platform launcher, plus native notifications.
-- Chat only: the window shows Messenger (`/messages`, its media viewer) and sign-in steps. Profiles, posts, groups and every other link open in the default browser, and Facebook's home feed is replaced by the chats. A second launch focuses the existing window.
-- On macOS the window is glass: Liquid Glass on macOS 26 and later, the translucent sidebar material on earlier releases, with the chat list showing through and the title bar overlaid on the page.
-- Appearance (System, Light, Grey, Dark, High contrast) can be switched from View → Appearance on macOS or the tray menu.
-- Preferences (⌘, on macOS from the app menu, Ctrl+, elsewhere, or the tray menu), modelled on the former Messenger desktop app: System, Light, Grey, Dark and High contrast themes; Do not disturb, notification previews and sounds; open at login; keep running in the tray when closed.
+- **Chat only.** The window shows your chats, their media viewer and the sign-in steps, nothing else. Profiles, posts, groups and every other link open in your default browser, and Facebook's home feed is replaced by the chats.
+- **Desktop look.** Full-height panes with no page scrollbars or Facebook header. On macOS the window is glass (Liquid Glass on macOS 26 and later, the translucent sidebar material on earlier releases), with the chat list as a floating panel.
+- **Themes.** System, Light, Grey, Dark (true black) and High contrast, applied to the whole page and window without a reload.
+- **Unread badge** on the Dock or taskbar and the tray, counting unread conversations (not Facebook notifications).
+- **Native notifications** with Do not disturb, hidden previews and sound options.
+- **Tray app.** Closing the window keeps it running in the tray (optional). Open at login (optional). A second launch focuses the running window.
 
-## Prerequisites
+## Download and install
 
-- **macOS 13+:** Xcode Command Line Tools, Rust, Node.js 20+ and npm.
-- **Windows:** MSVC Build Tools with “Desktop development with C++”, the WebView2 runtime (preinstalled on Windows 11), Rust, Node.js 20+ and npm.
-- **Debian/Ubuntu:** Rust, Node.js 20+ and npm, plus `libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev`.
-- **Fedora:** Rust, Node.js 20+ and npm, plus `webkit2gtk4.1-devel gcc-c++ curl wget file libxdo-devel openssl-devel libayatana-appindicator-devel librsvg2-devel` (package names may vary by release).
+Builds are attached to [GitHub Releases](https://github.com/bthanhtung/pure-messenger/releases), or to each run under [Actions](https://github.com/bthanhtung/pure-messenger/actions) (Artifacts section).
 
-## Run and build
+| System | File | Install |
+|---|---|---|
+| macOS 13+ (Apple silicon and Intel) | `PureMessenger_<version>_universal.dmg` | Open it and drag PureMessenger to Applications. |
+| Windows 10/11 (64-bit) | `PureMessenger_<version>_x64-setup.exe` | Run it. (`.msi` is also available.) |
+| Ubuntu / Debian (64-bit) | `PureMessenger_<version>_amd64.deb` | `sudo apt install ./PureMessenger_*_amd64.deb` |
+| Fedora (64-bit) | `PureMessenger-<version>-1.x86_64.rpm` | `sudo dnf install ./PureMessenger-*.x86_64.rpm` |
+| Other Linux (64-bit) | `PureMessenger_<version>_amd64.AppImage` | `chmod +x PureMessenger_*.AppImage`, then run it. |
+
+The builds are not code-signed, so the first launch shows a warning:
+
+- **macOS:** open System Settings → Privacy & Security and click **Open Anyway**. (Alternatively, run `xattr -cr /Applications/PureMessenger.app` once.)
+- **Windows:** in the SmartScreen dialog click **More info** → **Run anyway**.
+- **Linux:** an AppImage needs FUSE 2 (`libfuse2`, or `libfuse2t64` on Ubuntu 24.04). GNOME needs the AppIndicator extension to show the tray icon.
+
+## Using it
+
+- Sign in with your Facebook account in the window. The session stays in the system webview's data folder on your computer.
+- **Preferences:** ⌘, on macOS (PureMessenger menu), Ctrl+, on Windows and Linux, or the tray menu.
+- **Theme:** View → Appearance on macOS, or Appearance in the tray menu.
+- **Tray menu:** Show, Appearance, Preferences, Quit. On Linux use the tray menu to show the window; left-click does nothing there.
+
+| Preference | Effect |
+|---|---|
+| Theme | System, Light, Grey, Dark, High contrast |
+| Do not disturb | No desktop notifications |
+| Show previews | Show message text in notifications, or only "New message" |
+| Notification sounds | Play the system notification sound |
+| Open at login | Start PureMessenger when you sign in to your computer |
+| Keep running when closed | Closing the window hides it to the tray instead of quitting |
+
+## Build from source
+
+Requirements: [Rust](https://rustup.rs) (stable), Node.js 20+ and npm, plus:
+
+- **macOS 13+:** Xcode Command Line Tools.
+- **Windows:** Visual Studio Build Tools with "Desktop development with C++"; WebView2 (preinstalled on Windows 11).
+- **Debian/Ubuntu:** `sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev`
+- **Fedora:** `sudo dnf install webkit2gtk4.1-devel gcc-c++ curl wget file libxdo-devel openssl-devel libayatana-appindicator-devel librsvg2-devel`
 
 ```sh
 npm install
-npm run dev
-npm test
-npm run build
+npm run dev     # run in development
+npm test        # injected-script tests (Node) and Rust unit tests
+npm run build   # release bundles for the current system
 ```
 
-Release bundles are under `src-tauri/target/release/bundle`: macOS `.app`/`.dmg`, Windows `.msi`/NSIS `.exe`, and Linux `.deb`/`.AppImage`/`.rpm` as supported by the build host. For an unsigned macOS app, after reviewing and trusting the build, run `xattr -cr /Applications/PureMessenger.app`. On Windows, SmartScreen may offer “More info → Run anyway” for an unsigned app. GNOME users may need an AppIndicator extension for the tray.
+Bundles are written to `src-tauri/target/release/bundle/`. For one macOS build that runs on both Apple silicon and Intel:
+
+```sh
+rustup target add x86_64-apple-darwin
+npm run tauri build -- --target universal-apple-darwin
+```
+
+Tauri cannot reliably cross-compile, so each system's bundles are built on that system. The [Build workflow](.github/workflows/build.yml) does this on GitHub Actions for macOS (universal `.dmg`), Windows (`.exe`, `.msi`), Ubuntu (`.deb`, `.AppImage`) and Fedora (`.rpm`, built in a Fedora container) on every push to `main`; pushing a `v*` tag also attaches the bundles to a draft GitHub Release.
+
+## How it works
+
+| Path | Role |
+|---|---|
+| `src-tauri/src/window.rs` | Creates the window, glass effect and title bar; routes navigation (chat stays in, the rest goes to the browser). |
+| `src-tauri/src/commands.rs` | The few native commands the page may call: unread badge, notifications, theme, Preferences, open in browser. |
+| `src-tauri/src/settings.rs` | Preferences stored as `settings.json` in the app config folder; theme and Appearance menus. |
+| `src-tauri/src/tray.rs` | Tray icon and menu. |
+| `src-tauri/inject/inject.js` | Runs in the Messenger page: themes, layout mode, link routing, unread count, notification bridge. |
+| `src-tauri/inject/inject.css` | Layout, glass and theme styles. |
+| `dist/preferences.html` | The Preferences window. |
+
+### Maintenance
+
+Facebook changes its markup from time to time. Everything that depends on it is kept in one place:
+
+- `SELECTORS`, `CHAT_PATH`/`AUTH_PATH` and `FB_MODE` in `src-tauri/inject/inject.js`;
+- the theme color variables in `src-tauri/inject/inject.css`;
+- the browser `UA` strings in `src-tauri/src/window.rs` (keep WebKit on a Safari fingerprint and WebView2 on Edge).
+
+Themes work by reading Facebook's own light and dark color variables from the page and applying the chosen set with CSS, so nothing watches the page's DOM for theme changes.
+
+## Privacy and security
+
+- PureMessenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the system webview's data folder. No cookies or session values are logged or sent anywhere.
+- The Messenger page can call only `core:window:allow-start-dragging`, `core:window:allow-internal-toggle-maximize` and five app commands (`set_unread`, `notify`, `get_theme`, `open_preferences`, `open_external`, which opens only http(s) URLs in the browser). It cannot read or change other preferences; only the bundled Preferences window can.
+- These permissions apply only to HTTPS Facebook origins. Other sites, new windows and non-chat Facebook pages open in the default browser.
 
 ## Known limitations
 
-- Linux WebRTC calls may be unreliable in WebKitGTK.
-- Clicking a desktop notification does not focus the app: the desktop notification plugin does not expose that behavior.
-- Facebook markup changes may break the injected UI selectors.
-- HTTP Messenger/Facebook links are not embedded; they open in the system browser instead.
-- Links opening in a new tab go to the default browser instead of a new app window.
+- Unread counting reads the chat list (unread rows are shown in bold), so it covers the conversations Messenger has loaded, which are the most recent ones.
+- Clicking a notification does not bring the app forward (the notification plugin does not support it).
+- Calls and links that open a new window go to the default browser.
+- WebRTC calls on Linux (WebKitGTK) may be unreliable.
+- Facebook markup changes can break selectors until they are updated (see [Maintenance](#maintenance)).
 
-## Maintenance
+## License
 
-Update `SELECTORS`, `CHAT_PATH`/`AUTH_PATH` and `FB_MODE` in `src-tauri/inject/inject.js`, and the theme color variables in `src-tauri/inject/inject.css`, when Facebook changes its markup. Refresh the platform-specific `UA` constants in `src-tauri/src/window.rs` with stable browser versions, keeping WebKit on a Safari fingerprint and WebView2 on Edge.
+[PolyForm Noncommercial 1.0.0](LICENSE). You may use, copy, modify and share PureMessenger for any noncommercial purpose, such as personal use, study, or use by charities and educational institutions. Commercial use is not permitted. Keep the `Required Notice` line from the [LICENSE](LICENSE) file when you share it.
 
-## Security model
+Messenger and Facebook are trademarks of Meta Platforms, Inc.
 
-The remote page receives only `core:window:allow-start-dragging` and five application commands (`allow-set-unread`, `allow-notify`, `allow-get-theme`, `allow-open-preferences`, `allow-open-external`, which opens only http(s) URLs in the default browser); it cannot read or change other preferences. Only the bundled Preferences window may call `get_preferences` and `set_preferences`. Settings are stored as `settings.json` in the application config directory. Its capability applies only to HTTPS Facebook origins; navigation to unrelated domains and new-window links are opened externally. The app does not store Messenger data itself; the session resides in the operating system webview data directory. No cookie or session values are logged.
+## Hướng dẫn nhanh (tiếng Việt)
 
-## Manual test checklist
+**Tải bản cài** ở mục [Releases](https://github.com/bthanhtung/pure-messenger/releases):
 
-On each target OS, verify login, close-to-tray, tray Show and Quit, unread badge, native notifications, external links opening in the browser, second launch focusing the existing window, each theme, Preferences changes taking effect without a restart, and closing the window with "Keep running when closed" turned off. On macOS additionally verify Dock reopen after closing the window. On Linux use the tray menu, not left-click, to show the window.
+- **macOS:** tải file `.dmg`, mở ra rồi kéo PureMessenger vào Applications. Lần đầu mở bị chặn thì vào System Settings → Privacy & Security, bấm **Open Anyway**.
+- **Windows:** tải file `..._x64-setup.exe` rồi chạy. Nếu SmartScreen cảnh báo, bấm **More info** → **Run anyway**.
+- **Ubuntu/Debian:** tải file `.deb`, chạy `sudo apt install ./PureMessenger_*_amd64.deb`.
+- **Fedora:** tải file `.rpm`, chạy `sudo dnf install ./PureMessenger-*.x86_64.rpm`.
+- **Linux khác:** tải file `.AppImage`, chạy `chmod +x PureMessenger_*.AppImage` rồi mở.
+
+**Sử dụng:**
+
+- Đăng nhập Facebook trong cửa sổ app. App không lưu tin nhắn.
+- Đổi giao diện sáng/tối: menu View → Appearance (macOS) hoặc menu ở khay hệ thống.
+- Cài đặt (thông báo, tự mở khi khởi động máy…): ⌘, trên macOS, Ctrl+, trên Windows/Linux.
+- Link profile, bài viết… sẽ mở bằng trình duyệt, app chỉ dùng để chat.
+
+**Giấy phép:** được dùng, sửa và chia sẻ miễn phí cho mục đích phi thương mại. Không được dùng vào mục đích thương mại.
