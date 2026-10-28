@@ -55,28 +55,28 @@ html.pm-dark.pm-active [role="main"] > div > div { border-left-color: rgba(255, 
    which keeps scrolling and animation as cheap as possible. */
 html.pm-mac:not(.pm-active) body { padding-top: 28px !important; box-sizing: border-box; }
 html.pm-mac.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
-  /* The list and the conversation form one block inset 8px from every window edge; the list
-     takes its left corners and the conversation its right ones. */
+  /* The list and the conversation are two panels, 8px from every window edge and from each other. */
   margin: 8px 0 8px 8px !important;
   height: calc(100% - 16px) !important;
   padding-top: 24px !important;
   box-sizing: border-box !important;
-  border-radius: 18px 0 0 18px !important;
+  border-radius: 18px !important;
   overflow: hidden !important;
   background-color: var(--surface-background) !important;
   box-shadow: 0 0 0 .5px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .08) !important;
 }
 html.pm-mac.pm-dark.pm-active [role="navigation"]:not([aria-label="Facebook"]) { box-shadow: 0 0 0 .5px rgba(255, 255, 255, .1) !important; }
+/* The conversation, and the "no chat selected" panel shown before one is opened. */
+html.pm-mac.pm-active [role="main"] > div > div:not(:has([role="region"])),
 html.pm-mac.pm-active [role="main"] > div > div > div > [role="region"] > div > div > div > div {
-  margin: 8px 8px 8px 0 !important;
+  margin: 8px !important;
   height: calc(100% - 16px) !important;
-  border-radius: 0 18px 18px 0 !important;
+  border-radius: 18px !important;
   overflow: hidden !important;
-  border-left: 1px solid rgba(0, 0, 0, .08) !important;
   box-shadow: 0 0 0 .5px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .08) !important;
 }
+html.pm-mac.pm-dark.pm-active [role="main"] > div > div:not(:has([role="region"])),
 html.pm-mac.pm-dark.pm-active [role="main"] > div > div > div > [role="region"] > div > div > div > div {
-  border-left-color: rgba(255, 255, 255, .08) !important;
   box-shadow: 0 0 0 .5px rgba(255, 255, 255, .1) !important;
 }
 html.pm-mac.pm-active [role="main"] > div > div {
