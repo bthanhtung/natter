@@ -198,7 +198,36 @@ pub fn call_in_browser(app: tauri::AppHandle, url: String) -> Result<(), String>
 
 /// Signs out of Facebook by clearing the chat window's session data, then shows the sign-in page.
 #[tauri::command]
-pub fn sign_out(app: tauri::AppHandle, state: tauri::State<'_, AppState>) -> Result<(), String> {
+pub fn sign_out(app: tauri::AppHandle) -> Result<(), String> {
+    sign_out_now(&app)
+}
+
+/// Asks before signing out; used by the app and tray menus.
+pub fn confirm_sign_out(app: &tauri::AppHandle) {
+    use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
+
+    let handle = app.clone();
+    let dialog = app
+        .dialog()
+        .message("You will need to sign in to Facebook again to use PureMessenger.")
+        .title("Sign out of Facebook?")
+        .kind(MessageDialogKind::Warning)
+        .buttons(MessageDialogButtons::OkCancelCustom(
+            "Sign Out".to_owned(),
+            "Cancel".to_owned(),
+        ));
+    let dialog = match app.get_webview_window("main") {
+        Some(window) => dialog.parent(&window),
+        None => dialog,
+    };
+    dialog.show(move |confirmed| {
+        if confirmed {
+            let _ = sign_out_now(&handle);
+        }
+    });
+}
+
+fn sign_out_now(app: &tauri::AppHandle) -> Result<(), String> {
     let window = app
         .get_webview_window("main")
         .ok_or("main window unavailable")?;
@@ -210,8 +239,8 @@ pub fn sign_out(app: tauri::AppHandle, state: tauri::State<'_, AppState>) -> Res
             url::Url::parse("https://www.facebook.com/messages/").expect("static URL is valid"),
         )
         .map_err(|_| "the sign-in page could not be opened")?;
-    let _ = set_unread(app.clone(), state, 0);
-    crate::window::show(&app);
+    let _ = set_unread(app.clone(), app.state::<AppState>(), 0);
+    crate::window::show(app);
     Ok(())
 }
 

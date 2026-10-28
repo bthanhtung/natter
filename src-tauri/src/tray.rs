@@ -1,6 +1,6 @@
 use tauri::{
     image::Image,
-    menu::{Menu, MenuItem},
+    menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     Manager,
 };
@@ -21,8 +21,20 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
         app,
         app.state::<crate::settings::SettingsStore>().get().theme,
     )?;
+    let sign_out = MenuItem::with_id(app, "sign-out", "Sign Out…", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &appearance, &preferences, &quit])?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let menu = Menu::with_items(
+        app,
+        &[
+            &show,
+            &appearance,
+            &preferences,
+            &separator,
+            &sign_out,
+            &quit,
+        ],
+    )?;
     let builder = TrayIconBuilder::with_id("main")
         .icon(icon(false)?)
         .icon_as_template(false)
@@ -33,6 +45,7 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
             "preferences" => {
                 let _ = crate::window::show_preferences(app);
             }
+            "sign-out" => crate::commands::confirm_sign_out(app),
             "quit" => crate::window::quit(app),
             id => {
                 if let Some(theme) = crate::settings::ThemeChoice::from_menu_id(id) {

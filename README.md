@@ -41,7 +41,8 @@ The builds are not code-signed, so the first launch shows a warning:
 - Sign in with your Facebook account in the window. The session stays in the system webview's data folder on your computer.
 - **Preferences:** ⌘, on macOS (PureMessenger menu), Ctrl+, on Windows and Linux, or the tray menu.
 - **Theme:** View → Appearance on macOS, or Appearance in the tray menu.
-- **Tray menu:** Show, Appearance, Preferences, Quit. On Linux use the tray menu to show the window; left-click does nothing there.
+- **Sign out:** PureMessenger → Sign Out… on macOS, Sign Out… in the tray menu, or Preferences → Account. You are asked to confirm first.
+- **Tray menu:** Show, Appearance, Preferences, Sign Out…, Quit. On Linux use the tray menu to show the window; left-click does nothing there.
 
 | Preference | Effect |
 |---|---|
@@ -139,6 +140,7 @@ Messenger and Facebook are trademarks of Meta Platforms, Inc.
 - Đăng nhập Facebook trong cửa sổ app. App không lưu tin nhắn.
 - Đổi giao diện sáng/tối: menu View → Appearance (macOS) hoặc menu ở khay hệ thống.
 - Cài đặt (thông báo, tự mở khi khởi động máy…): ⌘, trên macOS, Ctrl+, trên Windows/Linux.
+- Đăng xuất: menu PureMessenger → Sign Out… (macOS), hoặc Sign Out… trong menu ở khay hệ thống.
 - Link profile, bài viết… sẽ mở bằng trình duyệt, app chỉ dùng để chat.
 
 **Giấy phép:** được dùng, sửa và chia sẻ miễn phí cho mục đích phi thương mại. Không được dùng vào mục đích thương mại.

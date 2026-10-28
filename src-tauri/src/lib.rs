@@ -20,6 +20,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_autostart::Builder::new().build())
         .manage(commands::AppState::new())
         .invoke_handler(tauri::generate_handler![
@@ -75,7 +76,7 @@ pub fn run() {
     });
 }
 
-/// Adds "Preferences…" (⌘,) below "About" and an Appearance submenu to View in the default
+/// Adds "Preferences…" (⌘,) and "Sign Out…" below "About" and an Appearance submenu to View in the default
 /// macOS application menu.
 #[cfg(target_os = "macos")]
 fn app_menu(app: &tauri::App) -> tauri::Result<()> {
@@ -90,8 +91,10 @@ fn app_menu(app: &tauri::App) -> tauri::Result<()> {
             true,
             Some("CmdOrCtrl+,"),
         )?;
+        let sign_out = MenuItem::with_id(app, "app-sign-out", "Sign Out…", true, None::<&str>)?;
         app_submenu.insert(&PredefinedMenuItem::separator(app)?, 1)?;
         app_submenu.insert(&preferences, 2)?;
+        app_submenu.insert(&sign_out, 3)?;
     }
     if let Some(view) = settings::find_submenu(menu.items()?, "View") {
         let theme = app.state::<settings::SettingsStore>().get().theme;
@@ -99,6 +102,7 @@ fn app_menu(app: &tauri::App) -> tauri::Result<()> {
     }
     app.set_menu(menu)?;
     app.on_menu_event(|app, event| match event.id().as_ref() {
+        "app-sign-out" => commands::confirm_sign_out(app),
         "app-preferences" => {
             let _ = window::show_preferences(app);
         }
