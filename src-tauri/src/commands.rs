@@ -144,6 +144,26 @@ pub fn notify(
         .map_err(|_| "notification unavailable".to_owned())
 }
 
+/// Tells the user a download finished in Downloads, or failed. Quiet in Do not disturb.
+pub fn notify_download<R: tauri::Runtime>(app: &tauri::AppHandle<R>, name: &str, success: bool) {
+    let settings = app.state::<SettingsStore>().get();
+    if settings.do_not_disturb {
+        return;
+    }
+    let (title, body) = if success {
+        let name = sanitize(name, 128);
+        let name = if name.is_empty() {
+            "The file".to_owned()
+        } else {
+            name
+        };
+        ("Downloaded", format!("{name} is in your Downloads folder."))
+    } else {
+        ("Download failed", sanitize(name, 128))
+    };
+    let _ = app.notification().builder().title(title).body(body).show();
+}
+
 /// Opens a link the chat-only window will not show, such as a profile, in the default browser.
 #[tauri::command]
 pub fn open_external(app: tauri::AppHandle, url: String) -> Result<(), String> {

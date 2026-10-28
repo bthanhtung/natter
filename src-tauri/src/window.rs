@@ -1,6 +1,15 @@
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::{
+    collections::HashMap,
+    path::PathBuf,
+    sync::{
+        atomic::{AtomicU32, Ordering},
+        LazyLock, Mutex,
+    },
+};
 use tauri::{
-    webview::{NewWindowFeatures, NewWindowResponse, PermissionKind, PermissionResponse},
+    webview::{
+        DownloadEvent, NewWindowFeatures, NewWindowResponse, PermissionKind, PermissionResponse,
+    },
     AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
 };
 use tauri_plugin_opener::OpenerExt;
@@ -49,19 +58,50 @@ fn facebook_redirect_target(url: &Url) -> Option<Url> {
         .filter(|target| matches!(target.scheme(), "http" | "https"))
 }
 
-/// Facebook opens calls with `window.open` on its own pages (or `about:blank` first); those get
-/// an app window. Everything else that asks for a new window goes to the browser.
+/// Facebook opens calls with `window.open` on its own call pages (or `about:blank` first); those
+/// get an app window. Everything else that asks for a new window, such as an attachment, goes to
+/// the browser.
 fn opens_in_app(url: &Url) -> bool {
     if url.as_str() == "about:blank" {
         return true;
     }
     url.scheme() == "https"
+        && url.path().to_ascii_lowercase().contains("call")
         && url.host_str().is_some_and(|host| {
             !matches!(host, "l.facebook.com" | "lm.facebook.com")
                 && ["facebook.com", "messenger.com"]
                     .iter()
                     .any(|domain| host == *domain || host.ends_with(&format!(".{domain}")))
         })
+}
+
+/// Where each running download is saved, to name it when it finishes.
+static DOWNLOADS: LazyLock<Mutex<HashMap<String, PathBuf>>> = LazyLock::new(Default::default);
+
+/// Attachments are saved to the Downloads folder (the webview picks a unique name there), with a
+/// notification when they finish.
+fn on_download<R: tauri::Runtime>(webview: tauri::Webview<R>, event: DownloadEvent<'_>) -> bool {
+    match event {
+        DownloadEvent::Requested { url, destination } => {
+            if let Ok(mut downloads) = DOWNLOADS.lock() {
+                downloads.insert(url.to_string(), destination.clone());
+            }
+        }
+        DownloadEvent::Finished { url, success, .. } => {
+            let path = DOWNLOADS
+                .lock()
+                .ok()
+                .and_then(|mut downloads| downloads.remove(url.as_str()));
+            let name = path
+                .as_deref()
+                .and_then(|path| path.file_name())
+                .map(|name| name.to_string_lossy().into_owned())
+                .unwrap_or_default();
+            crate::commands::notify_download(webview.app_handle(), &name, success);
+        }
+        _ => {}
+    }
+    true
 }
 
 /// Calls and voice clips need the camera, microphone and screen; nothing else is granted.
@@ -162,6 +202,9 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
         false
     })
     .on_permission_request(media_permission)
+    .on_download(on_download)
+    // Files dropped on the window go to Messenger's own drop zone, not to Tauri.
+    .disable_drag_drop_handler()
     .on_new_window({
         let app_handle = app.handle().clone();
         move |url, features| {
@@ -282,6 +325,7 @@ mod tests {
             "about:blank",
             "https://www.facebook.com/groupcall/ROOM:1/?call_id=2",
             "https://www.messenger.com/groupcall/ROOM:1/",
+            "https://www.facebook.com/videocall/incall/?peer_id=1",
         ] {
             assert!(
                 opens_in_app(&url::Url::parse(url).expect("valid URL")),
@@ -291,6 +335,8 @@ mod tests {
         for url in [
             "https://l.facebook.com/l.php?u=https%3A%2F%2Fexample.com",
             "https://scontent.xx.fbcdn.net/v/photo.jpg",
+            "https://www.facebook.com/messenger_attachments/?attachment_id=1",
+            "https://www.facebook.com/profile.php?id=1",
             "http://www.facebook.com/groupcall/ROOM:1/",
             "https://facebook.com.evil.io/groupcall/",
             "https://example.com/",

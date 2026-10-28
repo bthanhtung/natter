@@ -13,6 +13,7 @@ PureMessenger shows Meta's own Messenger page (`facebook.com/messages`) in a nat
 - **Light and fast.** The app adds no work while you scroll, type or hover: themes are plain CSS, and the unread count runs only when Facebook retitles the page, at idle time.
 - **Themes.** System, Light, Grey, Dark (true black) and High contrast, applied to the whole page and window without a reload.
 - **Unread badge** on the Dock or taskbar and the tray, counting unread conversations (not Facebook notifications).
+- **Files, photos and GIFs.** Send them with the attach button, by dragging them onto the window, or by pasting. Attachments you download are saved to your Downloads folder, with a notification when they finish.
 - **Native notifications** with Do not disturb, hidden previews and sound options.
 - **Voice and video calls** open in their own app window, with access to the camera, microphone and screen sharing, where Facebook allows calls in the browser engine (see [Known limitations](#known-limitations)).
 - **Tray app.** Closing the window keeps it running in the tray (optional). Open at login (optional). A second launch focuses the running window.
