@@ -78,7 +78,7 @@ rustup target add x86_64-apple-darwin
 npm run tauri build -- --target universal-apple-darwin
 ```
 
-Tauri cannot reliably cross-compile, so each system's bundles are built on that system. The [Build workflow](.github/workflows/build.yml) does this on GitHub Actions for macOS (universal `.dmg`), Windows (`.exe`, `.msi`), Ubuntu (`.deb`, `.AppImage`) and Fedora (`.rpm`, built in a Fedora container) on every push to `main`; pushing a `v*` tag also attaches the bundles to a draft GitHub Release.
+Tauri cannot reliably cross-compile, so each system's bundles are built on that system. The [Build workflow](.github/workflows/build.yml) does this on GitHub Actions for macOS (universal `.dmg`), Windows (`.exe`, `.msi`), Ubuntu (`.deb`, `.AppImage`) and Fedora (`.rpm`, built in a Fedora container) when started by hand (Actions → Build → Run workflow). Running it on a `v*` tag also attaches the bundles to a draft GitHub Release.
 
 ## How it works
 

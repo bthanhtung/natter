@@ -1,9 +1,8 @@
 name: Build
 
+# Manual only (Actions tab → Build → Run workflow), to save Actions minutes; macOS runners count
+# 10x. A run started on a v* tag publishes the bundles to a draft GitHub Release.
 on:
-  push:
-    branches: [main, feat/desktop-ui]
-    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
