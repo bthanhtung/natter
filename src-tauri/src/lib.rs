@@ -74,7 +74,7 @@ pub fn run() {
             }
         })
         .build(tauri::generate_context!())
-        .expect("failed to start Pure Messenger");
+        .expect("failed to start Pure Messenger Lite");
     app.run(|app, event| {
         #[cfg(target_os = "macos")]
         if let tauri::RunEvent::Reopen { .. } = event {

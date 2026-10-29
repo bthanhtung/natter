@@ -1,4 +1,6 @@
-# Pure Messenger
+# Pure Messenger Lite
+
+> This is the **Lite** build on the system webview (Tauri): about 10 MB, light on memory, but calls in end-to-end encrypted chats are not available on macOS and Linux. The full **Pure Messenger** build on Chromium, which can call, is on the [`main`](https://github.com/bthanhtung/pure-messenger/tree/main) branch.
 
 A small, chat-only desktop app for Facebook Messenger on macOS, Windows and Linux, in the spirit of the former Messenger desktop app (discontinued by Meta in December 2025).
 
@@ -35,7 +37,7 @@ Builds are attached to [GitHub Releases](https://github.com/bthanhtung/pure-mess
 
 | System | File | Install |
 |---|---|---|
-| macOS 13+ (Apple silicon and Intel) | `…_universal.dmg` | Open it and drag Pure Messenger to Applications. |
+| macOS 13+ (Apple silicon and Intel) | `…_universal.dmg` | Open it and drag Pure Messenger Lite to Applications. |
 | Windows 10/11 (64-bit) | `…_x64-setup.exe` | Run it. (`.msi` is also available.) |
 | Ubuntu / Debian (64-bit) | `…_amd64.deb` | `sudo apt install ./<file>.deb` |
 | Fedora (64-bit) | `…x86_64.rpm` | `sudo dnf install ./<file>.rpm` |
@@ -43,7 +45,7 @@ Builds are attached to [GitHub Releases](https://github.com/bthanhtung/pure-mess
 
 The builds are not code-signed, so the first launch shows a warning:
 
-- **macOS:** open System Settings → Privacy & Security and click **Open Anyway**. (Alternatively, run `xattr -cr "/Applications/Pure Messenger.app"` once.)
+- **macOS:** open System Settings → Privacy & Security and click **Open Anyway**. (Alternatively, run `xattr -cr "/Applications/Pure Messenger Lite.app"` once.)
 - **Windows:** in the SmartScreen dialog click **More info** → **Run anyway**.
 - **Linux:** an AppImage needs FUSE 2 (`libfuse2`, or `libfuse2t64` on Ubuntu 24.04). GNOME needs the AppIndicator extension to show the tray icon.
 

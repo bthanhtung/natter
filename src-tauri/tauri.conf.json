@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Pure Messenger",
+  "productName": "Pure Messenger Lite",
   "version": "0.1.3",
   "identifier": "dev.personal.puremessenger",
   "build": {

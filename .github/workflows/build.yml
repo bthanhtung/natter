@@ -1,4 +1,4 @@
-name: Build
+name: Build Lite
 
 # Manual only (Actions tab → Build → Run workflow), to save Actions minutes; macOS runners count
 # 10x. A run started on a v* tag publishes the bundles to a draft GitHub Release.
