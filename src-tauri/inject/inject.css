@@ -31,18 +31,19 @@ html.pm-active, html.pm-active body { overflow: hidden !important; }
 html.pm-active body, html.pm-active [role="main"] { margin-top: 0 !important; }
 /* Flush panes like the desktop app: the conversation is not a floating card with gutters. Its
    surface drops Facebook's 16px inset from the list and the height Facebook keeps for its own
-   header, so it reaches the bottom of the window. */
+   header, so it reaches the bottom of the window. Heights are in vh, never %: a percentage height
+   depends on the parent, so WebKit would re-lay out the whole page on every new message. */
 html.pm-active [role="main"] > div > div > div > [role="region"] > div > div > div > div {
   margin-left: 0 !important;
-  height: 100% !important;
-  max-height: none !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
 }
 html.pm-active div:has(> [role="main"]) { padding-right: 0 !important; }
 html.pm-active [role="main"] > div { padding-top: 0 !important; }
 html.pm-active [role="main"] > div > div {
   margin: 0 !important;
-  height: 100% !important;
-  max-height: none !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
   border-radius: 0 !important;
   box-shadow: none !important;
   border-left: 1px solid rgba(0, 0, 0, .08);
@@ -57,7 +58,7 @@ html.pm-mac:not(.pm-active) body { padding-top: 28px !important; box-sizing: bor
 html.pm-mac.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
   /* The list and the conversation are two panels, 8px from every window edge and from each other. */
   margin: 8px 0 8px 8px !important;
-  height: calc(100% - 16px) !important;
+  height: calc(100vh - 16px) !important;
   padding-top: 24px !important;
   box-sizing: border-box !important;
   border-radius: 18px !important;
@@ -71,7 +72,8 @@ html.pm-mac.pm-dark.pm-active [role="navigation"]:not([aria-label="Facebook"]) {
 html.pm-mac.pm-active [role="main"] > div > div:not(:has([role="region"])),
 html.pm-mac.pm-active [role="main"] > div > div > div > [role="region"] > div > div > div > div {
   margin: 8px !important;
-  height: calc(100% - 16px) !important;
+  height: calc(100vh - 16px) !important;
+  max-height: calc(100vh - 16px) !important;
   border-radius: 18px !important;
   overflow: hidden !important;
   box-shadow: 0 0 0 .5px rgba(0, 0, 0, .08), 0 1px 3px rgba(0, 0, 0, .08) !important;
