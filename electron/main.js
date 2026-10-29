@@ -1,4 +1,4 @@
-// Pure Messenger Call: the Chromium (Electron) build of Pure Messenger. Facebook allows calls in
+// The Chromium (Electron) build of Pure Messenger. Facebook allows calls in
 // end-to-end encrypted chats only in Chromium-based browsers, so this build can call where the
 // WebKit build (src-tauri) cannot. It reuses that build's injected script and style
 // (src-tauri/inject) and its Preferences page (dist/preferences.html).
@@ -427,6 +427,20 @@ function setUpSession() {
 // --- Start ----------------------------------------------------------------------------------------
 
 // Facebook treats an "Electron" user agent as an unknown browser; present plain Chrome.
+// Data lives in a folder named after the app id, not the display name, so a rename keeps the
+// session; the folder of the earlier "Pure Messenger Call" name moves there once.
+{
+  const appData = app.getPath("appData");
+  const dir = path.join(appData, "dev.personal.puremessenger.call");
+  const earlier = path.join(appData, "Pure Messenger Call");
+  if (!fs.existsSync(dir) && fs.existsSync(earlier)) {
+    try {
+      fs.renameSync(earlier, dir);
+    } catch (_) {}
+  }
+  app.setPath("userData", dir);
+}
+
 // Electron adds the app's and its own product tokens before "Chrome/"; drop everything there.
 app.userAgentFallback = app.userAgentFallback
   .replace(/\(KHTML, like Gecko\) .*?Chrome\//, "(KHTML, like Gecko) Chrome/")

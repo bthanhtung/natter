@@ -1,6 +1,6 @@
-name: Build Call
+name: Build Chromium
 
-# Pure Messenger Call (Electron / Chromium). Manual only, to save Actions minutes; macOS runners
+# Pure Messenger on Chromium (Electron). Manual only, to save Actions minutes; macOS runners
 # count 10x. A run started on a v* tag publishes the bundles to a draft GitHub Release.
 on:
   workflow_dispatch:
@@ -47,7 +47,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: PureMessengerCall-${{ matrix.name }}
+          name: PureMessenger-Chromium-${{ matrix.name }}
           path: |
             electron/dist/*.dmg
             electron/dist/*.exe

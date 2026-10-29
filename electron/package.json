@@ -1,6 +1,6 @@
 {
   "name": "pure-messenger-call",
-  "productName": "Pure Messenger Call",
+  "productName": "Pure Messenger",
   "version": "0.1.3",
   "private": true,
   "description": "Chat-only Messenger desktop app on Chromium, with voice and video calls",
@@ -18,7 +18,7 @@
   },
   "build": {
     "appId": "dev.personal.puremessenger.call",
-    "productName": "Pure Messenger Call",
+    "productName": "Pure Messenger",
     "files": [
       "main.js",
       "preload.js",
@@ -40,8 +40,8 @@
       "category": "public.app-category.social-networking",
       "identity": "-",
       "extendInfo": {
-        "NSCameraUsageDescription": "Pure Messenger Call uses the camera for Messenger video calls.",
-        "NSMicrophoneUsageDescription": "Pure Messenger Call uses the microphone for Messenger calls and voice clips."
+        "NSCameraUsageDescription": "Pure Messenger uses the camera for Messenger video calls.",
+        "NSMicrophoneUsageDescription": "Pure Messenger uses the microphone for Messenger calls and voice clips."
       },
       "hardenedRuntime": false
     },
