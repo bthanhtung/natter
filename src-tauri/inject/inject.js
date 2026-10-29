@@ -213,7 +213,8 @@
     }
 
     function blockedCallButton(target) {
-      if (window.__PM_PLATFORM__ === "windows" || !target || typeof target.closest !== "function") return null;
+      // Windows (WebView2) and the Chromium build (__PM_CALLS__) can make these calls themselves.
+      if (window.__PM_CALLS__ === true || window.__PM_PLATFORM__ === "windows" || !target || typeof target.closest !== "function") return null;
       const button = target.closest('[role="button"][aria-disabled="true"]');
       const chat = button && button.closest(SELECTORS.chat);
       if (!chat) return null;

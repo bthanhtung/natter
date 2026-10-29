@@ -5,3 +5,6 @@ src-tauri/target/
 dist/*
 !dist/index.html
 !dist/preferences.html
+electron/node_modules/
+electron/shared/
+electron/dist/

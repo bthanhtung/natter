@@ -6,6 +6,17 @@ Pure Messenger shows Meta's own Messenger page (`facebook.com/messages`) in a na
 
 > Tiếng Việt: xem [Hướng dẫn nhanh](#hướng-dẫn-nhanh-tiếng-việt) ở cuối trang.
 
+## Two builds
+
+| | Pure Messenger | Pure Messenger Call |
+|---|---|---|
+| Engine | The system webview (WebKit on macOS and Linux, WebView2 on Windows), via Tauri | Chromium, via Electron (`electron/`, branch `main-call`) |
+| Calls in encrypted chats | Windows only; on macOS and Linux the call buttons hand off to a Chromium browser | Everywhere, in the app |
+| Encrypted chat sync | Facebook's encryption worker runs at background priority in WebKit, so chats that were not open can lag behind | Same as Chrome |
+| Size | about 10 MB app, about 600 MB memory with a chat open | about 490 MB app (universal macOS), memory like a Chrome tab |
+
+Both share the injected script and style (`src-tauri/inject`) and the Preferences page (`dist/preferences.html`), so their look and behaviour stay the same. They install side by side; each keeps its own sign-in.
+
 ## Features
 
 - **Chat only.** The window shows your chats, their media viewer and the sign-in steps, nothing else. Profiles, posts, groups and every other link open in your default browser, and Facebook's home feed is replaced by the chats.
@@ -79,6 +90,17 @@ npm run tauri build -- --target universal-apple-darwin
 ```
 
 Tauri cannot reliably cross-compile, so each system's bundles are built on that system. The [Build workflow](.github/workflows/build.yml) does this on GitHub Actions for macOS (universal `.dmg`), Windows (`.exe`, `.msi`), Ubuntu (`.deb`, `.AppImage`) and Fedora (`.rpm`, built in a Fedora container) when started by hand (Actions → Build → Run workflow). Running it on a `v*` tag also attaches the bundles to a draft GitHub Release.
+
+### Pure Messenger Call (Electron)
+
+```sh
+cd electron
+npm install
+npm start        # run in development (PM_DEBUG=1 prints the injected script's state)
+npm run build    # bundles for the current system in electron/dist
+```
+
+`npm start` and `npm run build` first copy the shared files into `electron/shared`. On macOS the build is a universal `.dmg`, ad-hoc signed. The [Build Call workflow](.github/workflows/build-call.yml) builds macOS, Windows and Linux bundles when started by hand.
 
 ## How it works
 
