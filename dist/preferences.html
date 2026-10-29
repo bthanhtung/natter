@@ -84,7 +84,7 @@
   <div class="card">
     <label class="row"><span>Open at login</span><span class="switch"><input type="checkbox" name="launchAtLogin"><span></span></span></label>
     <label class="row"><span>Keep running when closed<small>Closing the window hides it to the tray instead of quitting</small></span><span class="switch"><input type="checkbox" name="closeToTray"><span></span></span></label>
-    <label class="row mac-only"><span>Glass effect<small>Translucent window. Uses more graphics power; applies after restarting Pure Messenger</small></span><span class="switch"><input type="checkbox" name="glass"><span></span></span></label>
+    <label class="row mac-only"><span>Glass effect<small>Translucent window. Uses more graphics power; applies after restarting the app</small></span><span class="switch"><input type="checkbox" name="glass"><span></span></span></label>
   </div>
   <h2>Account</h2>
   <div class="card">
@@ -157,7 +157,7 @@
     invoke("sign_out").then(() => {
       signOut.textContent = "Signed Out";
       status.className = "";
-      status.textContent = "Sign in again in the Pure Messenger window.";
+      status.textContent = "Sign in again in the app window.";
     }, error => {
       signOut.disabled = false;
       signOut.textContent = "Sign Out";

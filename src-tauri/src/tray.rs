@@ -15,7 +15,7 @@ pub fn icon(unread: bool) -> Result<Image<'static>, tauri::Error> {
 }
 
 pub fn create(app: &tauri::App) -> tauri::Result<()> {
-    let show = MenuItem::with_id(app, "show", "Show Pure Messenger", true, None::<&str>)?;
+    let show = MenuItem::with_id(app, "show", "Show Pure Messenger Lite", true, None::<&str>)?;
     let preferences = MenuItem::with_id(app, "preferences", "Preferences…", true, None::<&str>)?;
     let appearance = crate::settings::appearance_menu(
         app,
@@ -38,7 +38,7 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
     let builder = TrayIconBuilder::with_id("main")
         .icon(icon(false)?)
         .icon_as_template(false)
-        .tooltip("Pure Messenger")
+        .tooltip("Pure Messenger Lite")
         .menu(&menu)
         .on_menu_event(|app, event| match event.id().as_ref() {
             "show" => crate::window::show(app),

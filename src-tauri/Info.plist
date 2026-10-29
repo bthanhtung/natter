@@ -3,8 +3,8 @@
 <plist version="1.0">
 <dict>
   <key>NSCameraUsageDescription</key>
-  <string>Pure Messenger uses the camera for Messenger video calls.</string>
+  <string>Pure Messenger Lite uses the camera for Messenger video calls.</string>
   <key>NSMicrophoneUsageDescription</key>
-  <string>Pure Messenger uses the microphone for Messenger calls and voice clips.</string>
+  <string>Pure Messenger Lite uses the microphone for Messenger calls and voice clips.</string>
 </dict>
 </plist>
