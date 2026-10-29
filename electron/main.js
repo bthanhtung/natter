@@ -223,6 +223,15 @@ function setTheme(theme) {
 // --- Unread badge, notifications --------------------------------------------------------------
 
 const icon = name => nativeImage.createFromPath(path.join(SHARED, "icons", name));
+
+// The macOS menu bar takes monochrome template images (with @2x siblings) that the system tints
+// for light and dark menu bars; other trays get the colour icon.
+function trayIcon(unread) {
+  if (PLATFORM !== "macos") return icon(unread ? "tray-unread.png" : "tray.png");
+  const image = icon(unread ? "trayUnreadTemplate.png" : "trayTemplate.png");
+  image.setTemplateImage(true);
+  return image;
+}
 let unread = 0;
 
 function setUnread(count) {
@@ -232,7 +241,7 @@ function setUnread(count) {
   if (PLATFORM === "windows") mainWindow.setOverlayIcon(count ? icon("badge.png") : null, count ? `${count} unread` : "");
   else app.setBadgeCount(count);
   if (tray) {
-    tray.setImage(icon(count ? "tray-unread.png" : "tray.png"));
+    tray.setImage(trayIcon(count > 0));
     tray.setToolTip(count ? `${app.getName()} — ${count} unread` : app.getName());
   }
 }
@@ -377,7 +386,7 @@ function buildMenus() {
 }
 
 function createTray() {
-  tray = new Tray(icon("tray.png"));
+  tray = new Tray(trayIcon(false));
   tray.setToolTip(app.getName());
   if (PLATFORM !== "linux") {
     tray.on("click", () => {

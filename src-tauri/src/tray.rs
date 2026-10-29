@@ -5,11 +5,16 @@ use tauri::{
     Manager,
 };
 
+/// The macOS menu bar takes a monochrome template image (drawn at 2x, shown at 18 pt) that the
+/// system tints for light and dark menu bars; other trays get the colour icon.
+pub const TEMPLATE: bool = cfg!(target_os = "macos");
+
 pub fn icon(unread: bool) -> Result<Image<'static>, tauri::Error> {
-    let bytes = if unread {
-        include_bytes!("../icons/tray-unread.png").as_slice()
-    } else {
-        include_bytes!("../icons/tray.png").as_slice()
+    let bytes = match (TEMPLATE, unread) {
+        (true, true) => include_bytes!("../icons/trayUnreadTemplate@2x.png").as_slice(),
+        (true, false) => include_bytes!("../icons/trayTemplate@2x.png").as_slice(),
+        (false, true) => include_bytes!("../icons/tray-unread.png").as_slice(),
+        (false, false) => include_bytes!("../icons/tray.png").as_slice(),
     };
     Image::from_bytes(bytes)
 }
@@ -37,7 +42,7 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
     )?;
     let builder = TrayIconBuilder::with_id("main")
         .icon(icon(false)?)
-        .icon_as_template(false)
+        .icon_as_template(TEMPLATE)
         .tooltip("Pure Messenger Lite")
         .menu(&menu)
         .on_menu_event(|app, event| match event.id().as_ref() {

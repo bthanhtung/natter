@@ -13,6 +13,10 @@ const files = {
   "inject.css": "src-tauri/inject/inject.css",
   "preferences.html": "dist/preferences.html",
   "icons/tray.png": "src-tauri/icons/tray.png",
+  "icons/trayTemplate.png": "src-tauri/icons/trayTemplate.png",
+  "icons/trayTemplate@2x.png": "src-tauri/icons/trayTemplate@2x.png",
+  "icons/trayUnreadTemplate.png": "src-tauri/icons/trayUnreadTemplate.png",
+  "icons/trayUnreadTemplate@2x.png": "src-tauri/icons/trayUnreadTemplate@2x.png",
   "icons/tray-unread.png": "src-tauri/icons/tray-unread.png",
   "icons/badge.png": "src-tauri/icons/badge.png"
 };
