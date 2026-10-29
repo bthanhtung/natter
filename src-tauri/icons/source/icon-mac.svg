@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38C8FF"/>
+      <stop offset="0.55" stop-color="#2F7BF6"/>
+      <stop offset="1" stop-color="#2442D8"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.34"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bubble" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#E7F0FF"/>
+    </linearGradient>
+    <linearGradient id="dot" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#36B4FF"/>
+      <stop offset="1" stop-color="#2648DB"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#0B1F7A" flood-opacity="0.28"/>
+    </filter>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)"><rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/></g>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#gloss)"/>
+  <rect x="101.5" y="101.5" width="821" height="821" rx="183.5" fill="none" stroke="#ffffff" stroke-opacity="0.28" stroke-width="3"/>
+  <!-- back bubble -->
+  <g transform="translate(560 318)">
+    <path d="M0 0 h132 a96 96 0 0 1 96 96 v52 a96 96 0 0 1 -96 96 h-6 l34 46 l-74 -46 h-86 a96 96 0 0 1 -96 -96 v-52 a96 96 0 0 1 96 -96 z" fill="#ffffff" fill-opacity="0.38"/>
+  </g>
+  <!-- front bubble -->
+  <g transform="translate(250 372)">
+    <path d="M118 0 h248 a118 118 0 0 1 118 118 v86 a118 118 0 0 1 -118 118 h-208 l-104 74 l26 -86 a118 118 0 0 1 -80 -106 v-86 a118 118 0 0 1 118 -118 z" fill="url(#bubble)" filter="url(#soft)"/>
+    <circle cx="150" cy="161" r="30" fill="url(#dot)"/>
+    <circle cx="242" cy="161" r="30" fill="url(#dot)"/>
+    <circle cx="334" cy="161" r="30" fill="url(#dot)"/>
+  </g>
+</svg>
