@@ -98,6 +98,7 @@ pub fn set_unread(
         let _ = tray.set_icon(Some(
             crate::tray::icon(count > 0).map_err(|_| "tray icon unavailable")?,
         ));
+        let _ = tray.set_icon_as_template(crate::tray::TEMPLATE);
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         let _ = tray.set_tooltip(Some(if count > 0 {
             format!("Pure Messenger Lite — {count} unread")
