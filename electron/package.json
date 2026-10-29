@@ -41,7 +41,8 @@
       "identity": "-",
       "extendInfo": {
         "NSCameraUsageDescription": "Pure Messenger uses the camera for Messenger video calls.",
-        "NSMicrophoneUsageDescription": "Pure Messenger uses the microphone for Messenger calls and voice clips."
+        "NSMicrophoneUsageDescription": "Pure Messenger uses the microphone for Messenger calls and voice clips.",
+        "NSLocalNetworkUsageDescription": "Pure Messenger can connect calls directly to devices on your local network."
       },
       "hardenedRuntime": false
     },
@@ -60,6 +61,7 @@
       "icon": "../src-tauri/icons/icon.png",
       "category": "Network",
       "maintainer": "TungDaDev"
-    }
+    },
+    "afterPack": "build-hooks/after-pack.js"
   }
 }

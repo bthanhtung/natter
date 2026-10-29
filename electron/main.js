@@ -450,6 +450,11 @@ function setUpSession() {
   app.setPath("userData", dir);
 }
 
+// Without these Chromium sends multicast on the local network (Cast device discovery, and mDNS
+// names that hide local IPs in WebRTC), which makes macOS ask for Local Network access at launch.
+// Calls still connect through Facebook's servers.
+app.commandLine.appendSwitch("disable-features", "MediaRouter,WebRtcHideLocalIpsWithMdns");
+
 // Electron adds the app's and its own product tokens before "Chrome/"; drop everything there.
 app.userAgentFallback = app.userAgentFallback
   .replace(/\(KHTML, like Gecko\) .*?Chrome\//, "(KHTML, like Gecko) Chrome/")
