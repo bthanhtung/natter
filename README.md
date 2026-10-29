@@ -1,8 +1,6 @@
-# Pure Messenger Lite
+# Pure Messenger
 
-> This is the **Lite** build on the system webview (Tauri): about 10 MB, light on memory, but calls in end-to-end encrypted chats are not available on macOS and Linux. The full **Pure Messenger** build on Chromium, which can call, is on the [`main`](https://github.com/bthanhtung/pure-messenger/tree/main) branch.
-
-A small, chat-only desktop app for Facebook Messenger on macOS, Windows and Linux, in the spirit of the former Messenger desktop app (discontinued by Meta in December 2025).
+A chat-only desktop app for Facebook Messenger on macOS, Windows and Linux, in the spirit of the former Messenger desktop app (discontinued by Meta in December 2025), with voice and video calls.
 
 Pure Messenger shows Meta's own Messenger page (`facebook.com/messages`) in a native window and restyles it. It does not use unofficial APIs, scrape or automate anything, and it is not affiliated with or endorsed by Meta.
 
@@ -10,26 +8,26 @@ Pure Messenger shows Meta's own Messenger page (`facebook.com/messages`) in a na
 
 ## Two builds
 
-| | Pure Messenger (WebKit, `main`) | Pure Messenger (Chromium, `main-call`) |
+| | **Pure Messenger** (this branch, `main`) | **Pure Messenger Lite** (branch [`main-lite`](https://github.com/bthanhtung/pure-messenger/tree/main-lite)) |
 |---|---|---|
-| Engine | The system webview (WebKit on macOS and Linux, WebView2 on Windows), via Tauri | Chromium, via Electron (`electron/`, branch `main-call`) |
-| Calls in encrypted chats | Windows only; on macOS and Linux the call buttons hand off to a Chromium browser | Everywhere, in the app |
-| Encrypted chat sync | Facebook's encryption worker runs at background priority in WebKit, so chats that were not open can lag behind | Same as Chrome |
-| Size | about 10 MB app, about 600 MB memory with a chat open | about 490 MB app (universal macOS), memory like a Chrome tab |
+| Engine | Chromium, via Electron (`electron/`) | The system webview (WebKit on macOS and Linux, WebView2 on Windows), via Tauri (`src-tauri/`) |
+| Calls in encrypted chats | Everywhere, in the app | Windows only; on macOS and Linux the call buttons hand off to a Chromium browser |
+| Encrypted chat sync | Same as Chrome | Facebook's encryption worker runs at background priority in WebKit, so chats that were not open can lag behind |
+| Size | about 490 MB app (universal macOS), memory like a Chrome tab | about 10 MB app, about 600 MB memory with a chat open |
 
-Both are named Pure Messenger, so install one of them. They share the injected script and style (`src-tauri/inject`) and the Preferences page (`dist/preferences.html`), so their look and behaviour stay the same. Each keeps its own sign-in.
+Both share the injected script and style (`src-tauri/inject`) and the Preferences page (`dist/preferences.html`), so they look and behave the same. They have different app ids and data folders and can be installed side by side; each keeps its own sign-in.
 
 ## Features
 
 - **Chat only.** The window shows your chats, their media viewer and the sign-in steps, nothing else. Profiles, posts, groups and every other link open in your default browser, and Facebook's home feed is replaced by the chats.
-- **Desktop look.** Full-height panes with no page scrollbars or Facebook header. On macOS the title bar blends into the window and the chat list floats as a rounded panel, after Apple's macOS 26 design. An optional glass window (Liquid Glass on macOS 26 and later, the translucent sidebar material earlier) can be turned on in Preferences.
-- **Light and fast.** The app adds no work while you scroll, type or hover: themes are plain CSS, and the unread count runs only when Facebook retitles the page, at idle time.
+- **Voice and video calls** in their own app window, with the camera, microphone and screen sharing, in every chat including end-to-end encrypted ones.
+- **Desktop look.** Full-height panes with no page scrollbars or Facebook header. On macOS the title bar blends into the window and the chat list floats as a rounded panel, after Apple's macOS 26 design. An optional glass window can be turned on in Preferences.
+- **Light on the page.** The app adds no work while you scroll, type or hover: themes are plain CSS, and the unread count runs only when Facebook retitles the page, at idle time.
 - **Themes.** By default the app follows Facebook's own Dark mode setting (Off, On or Automatic). System, Light, Grey, Dark (true black) and High contrast override it, applied to the whole page without a reload.
 - **Unread badge** on the Dock or taskbar and the tray, counting unread conversations (not Facebook notifications).
-- **Files, photos and GIFs.** Send them with the attach button, by dragging them onto the window, or by pasting. Attachments you download are saved to your Downloads folder, with a notification when they finish.
+- **Files, photos and GIFs.** Send them with the attach button, by dragging them onto the window, or by pasting. Downloads go to your Downloads folder, with a notification when they finish.
 - **Native notifications** with Do not disturb, hidden previews and sound options.
-- **Voice and video calls** open in their own app window, with access to the camera, microphone and screen sharing, where Facebook allows calls in the browser engine. Where it does not (encrypted chats on macOS and Linux), the call buttons say so and a click continues the call in Chrome, Edge, Brave or another Chromium-based browser (see [Known limitations](#known-limitations)).
-- **Tray app.** Closing the window keeps it running in the tray (optional). Open at login (optional). A second launch focuses the running window.
+- **Tray app.** Closing the window keeps it running in the tray (optional), and chats stay real time while it is hidden. Open at login (optional). A second launch focuses the running window.
 
 ## Download and install
 
@@ -37,25 +35,27 @@ Builds are attached to [GitHub Releases](https://github.com/bthanhtung/pure-mess
 
 | System | File | Install |
 |---|---|---|
-| macOS 13+ (Apple silicon and Intel) | `…_universal.dmg` | Open it and drag Pure Messenger Lite to Applications. |
-| Windows 10/11 (64-bit) | `…_x64-setup.exe` | Run it. (`.msi` is also available.) |
-| Ubuntu / Debian (64-bit) | `…_amd64.deb` | `sudo apt install ./<file>.deb` |
-| Fedora (64-bit) | `…x86_64.rpm` | `sudo dnf install ./<file>.rpm` |
-| Other Linux (64-bit) | `…_amd64.AppImage` | `chmod +x <file>.AppImage`, then run it. |
+| macOS 13+ (Apple silicon and Intel) | `Pure Messenger-<version>-universal.dmg` | Open it and drag Pure Messenger to Applications. |
+| Windows 10/11 (64-bit) | `Pure Messenger Setup <version>.exe` | Run it. |
+| Ubuntu / Debian (64-bit) | `….deb` | `sudo apt install ./<file>.deb` |
+| Fedora (64-bit) | `….rpm` | `sudo dnf install ./<file>.rpm` |
+| Other Linux (64-bit) | `….AppImage` | `chmod +x <file>.AppImage`, then run it. |
 
 The builds are not code-signed, so the first launch shows a warning:
 
-- **macOS:** open System Settings → Privacy & Security and click **Open Anyway**. (Alternatively, run `xattr -cr "/Applications/Pure Messenger Lite.app"` once.)
+- **macOS:** open System Settings → Privacy & Security and click **Open Anyway**. (Alternatively, run `xattr -cr "/Applications/Pure Messenger.app"` once.)
 - **Windows:** in the SmartScreen dialog click **More info** → **Run anyway**.
 - **Linux:** an AppImage needs FUSE 2 (`libfuse2`, or `libfuse2t64` on Ubuntu 24.04). GNOME needs the AppIndicator extension to show the tray icon.
 
+Facebook sees each install as a new device: sign in, then enter your Messenger PIN when asked so your encrypted chat history is restored.
+
 ## Using it
 
-- Sign in with your Facebook account in the window. The session stays in the system webview's data folder on your computer.
-- **Preferences:** ⌘, on macOS (Pure Messenger menu), Ctrl+, on Windows and Linux, or the tray menu.
+- Sign in with your Facebook account in the window. The session stays in the app's data folder on your computer.
+- **Preferences:** ⌘, on macOS (Pure Messenger menu), or the tray menu.
 - **Theme:** View → Appearance on macOS, or Appearance in the tray menu.
 - **Sign out:** Pure Messenger → Sign Out… on macOS, Sign Out… in the tray menu, or Preferences → Account. You are asked to confirm first.
-- **Tray menu:** Show, Appearance, Preferences, Sign Out…, Quit. On Linux use the tray menu to show the window; left-click does nothing there.
+- **Tray menu:** Show, Appearance, Preferences, Sign Out…, Quit. On Linux use the tray menu to show the window.
 
 | Preference | Effect |
 |---|---|
@@ -70,30 +70,7 @@ The builds are not code-signed, so the first launch shows a warning:
 
 ## Build from source
 
-Requirements: [Rust](https://rustup.rs) (stable), Node.js 20+ and npm, plus:
-
-- **macOS 13+:** Xcode Command Line Tools.
-- **Windows:** Visual Studio Build Tools with "Desktop development with C++"; WebView2 (preinstalled on Windows 11).
-- **Debian/Ubuntu:** `sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev`
-- **Fedora:** `sudo dnf install webkit2gtk4.1-devel gcc-c++ curl wget file libxdo-devel openssl-devel libayatana-appindicator-devel librsvg2-devel`
-
-```sh
-npm install
-npm run dev     # run in development
-npm test        # injected-script tests (Node) and Rust unit tests
-npm run build   # release bundles for the current system
-```
-
-Bundles are written to `src-tauri/target/release/bundle/`. For one macOS build that runs on both Apple silicon and Intel:
-
-```sh
-rustup target add x86_64-apple-darwin
-npm run tauri build -- --target universal-apple-darwin
-```
-
-Tauri cannot reliably cross-compile, so each system's bundles are built on that system. The [Build workflow](.github/workflows/build.yml) does this on GitHub Actions for macOS (universal `.dmg`), Windows (`.exe`, `.msi`), Ubuntu (`.deb`, `.AppImage`) and Fedora (`.rpm`, built in a Fedora container) when started by hand (Actions → Build → Run workflow). Running it on a `v*` tag also attaches the bundles to a draft GitHub Release.
-
-### Pure Messenger on Chromium (Electron)
+Requirements: Node.js 20+ and npm.
 
 ```sh
 cd electron
@@ -102,19 +79,25 @@ npm start        # run in development (PM_DEBUG=1 prints the injected script's s
 npm run build    # bundles for the current system in electron/dist
 ```
 
-`npm start` and `npm run build` first copy the shared files into `electron/shared`. On macOS the build is a universal `.dmg`, ad-hoc signed. The [Build Chromium workflow](.github/workflows/build-call.yml) builds macOS, Windows and Linux bundles when started by hand.
+`npm start` and `npm run build` first copy the shared files (`src-tauri/inject`, `dist/preferences.html`, tray icons) into `electron/shared`. On macOS the build is a universal `.dmg`, ad-hoc signed. The [Build Chromium workflow](.github/workflows/build-call.yml) builds macOS, Windows and Linux bundles on GitHub Actions when started by hand (Actions → Build Chromium → Run workflow); started on a `v*` tag it also attaches them to a draft release.
+
+The injected script's tests run with `node --test src-tauri/inject/inject.test.mjs` (or `npm test` at the repository root, which also runs the Lite build's Rust tests).
+
+The Lite build (`src-tauri/`) builds with Tauri; see the [`main-lite`](https://github.com/bthanhtung/pure-messenger/tree/main-lite) branch for its requirements and the Build Lite workflow.
 
 ## How it works
 
 | Path | Role |
 |---|---|
-| `src-tauri/src/window.rs` | Creates the window, glass effect and title bar; routes navigation (chat stays in, the rest goes to the browser). |
-| `src-tauri/src/commands.rs` | The few native commands the page may call: unread badge, notifications, theme, Preferences, open in browser. |
-| `src-tauri/src/settings.rs` | Preferences stored as `settings.json` in the app config folder; theme and Appearance menus. |
-| `src-tauri/src/tray.rs` | Tray icon and menu. |
-| `src-tauri/inject/inject.js` | Runs in the Messenger page: themes, layout mode, link routing, unread count, notification bridge. |
-| `src-tauri/inject/inject.css` | Layout, glass and theme styles. |
-| `dist/preferences.html` | The Preferences window. |
+| `electron/main.js` | Pure Messenger: window, navigation rules (chat stays in, the rest goes to the browser), call windows, permissions, tray, menus, notifications, settings. |
+| `electron/preload.js` | Gives the page the same `invoke` bridge as the Lite build and runs the injected script before Facebook's scripts. |
+| `src-tauri/src/window.rs` | Lite: creates the window, glass effect and title bar; routes navigation (chat stays in, the rest goes to the browser). |
+| `src-tauri/src/commands.rs` | Lite: the few native commands the page may call: unread badge, notifications, theme, Preferences, open in browser. |
+| `src-tauri/src/settings.rs` | Lite: preferences stored as `settings.json` in the app config folder; theme and Appearance menus. |
+| `src-tauri/src/tray.rs` | Lite: tray icon and menu. |
+| `src-tauri/inject/inject.js` | Both builds: runs in the Messenger page: themes, layout mode, link routing, unread count, notification bridge. |
+| `src-tauri/inject/inject.css` | Both builds: layout, glass and theme styles. |
+| `dist/preferences.html` | Both builds: the Preferences window. |
 
 ### Maintenance
 
@@ -122,30 +105,30 @@ Facebook changes its markup from time to time. Everything that depends on it is 
 
 - `SELECTORS`, `CHAT_PATH`/`AUTH_PATH` and `FB_MODE` in `src-tauri/inject/inject.js`;
 - the theme color variables in `src-tauri/inject/inject.css`;
-- the browser `UA` strings in `src-tauri/src/window.rs` (keep WebKit on a Safari fingerprint and WebView2 on Edge).
+- Pure Messenger presents Electron's own Chrome user agent without the Electron token (`electron/main.js`); the Lite build's `UA` strings are in `src-tauri/src/window.rs` (keep WebKit on a Safari fingerprint and WebView2 on Edge).
 
 Themes work by reading Facebook's own light and dark color variables from the page and applying the chosen set with CSS, so nothing watches the page's DOM for theme changes.
 
 ### Resource use
 
-Measured idle on macOS with a chat open: the app process itself uses about 26 MB of memory, 7 threads and no CPU. Nearly everything else is Facebook's own page in WebKit: about 400 MB for Messenger and about 130 MB for Facebook's end-to-end encryption engine, which runs in a hidden `fbsbx.com/maw_proxy_page` frame in its own process and is required for encrypted chats. The page keeps running while the window is hidden, so messages and notifications arrive in real time from the tray.
+Lite build, measured idle on macOS with a chat open: the app process itself uses about 26 MB of memory, 7 threads and no CPU. Nearly everything else is Facebook's own page in WebKit: about 400 MB for Messenger and about 130 MB for Facebook's end-to-end encryption engine, which runs in a hidden `fbsbx.com/maw_proxy_page` frame in its own process and is required for encrypted chats. The page keeps running while the window is hidden, so messages and notifications arrive in real time from the tray.
 
 ## Privacy and security
 
-- Pure Messenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the system webview's data folder. No cookies or session values are logged or sent anywhere.
-- The Messenger page can call only `core:window:allow-start-dragging`, `core:window:allow-internal-toggle-maximize` and six app commands (`set_unread`, `notify`, `get_theme`, `open_preferences`, `open_external`, which opens only http(s) URLs in the browser, and `call_in_browser`, which accepts only Facebook chat URLs). It cannot read or change other preferences; only the bundled Preferences window can.
+- Pure Messenger stores no messages. Its only file is `settings.json`; the Facebook session lives in the app's own data folder. No cookies or session values are logged or sent anywhere.
+- The Messenger page can call only a few app commands (in Pure Messenger they are checked against the window that sent them). In the Lite build those are `core:window:allow-start-dragging`, `core:window:allow-internal-toggle-maximize` and six app commands (`set_unread`, `notify`, `get_theme`, `open_preferences`, `open_external`, which opens only http(s) URLs in the browser, and `call_in_browser`, which accepts only Facebook chat URLs). It cannot read or change other preferences; only the bundled Preferences window can.
 - These permissions apply only to HTTPS Facebook origins. Other sites and non-chat Facebook pages open in the default browser.
 - Sign-in checks stay in the app window, so they verify the session you are signing in to: Meta's account pages and the reCAPTCHA, hCaptcha and Arkose challenge frames Facebook embeds are allowed there.
 - Camera, microphone and screen sharing are granted to Facebook pages for calls and voice clips; macOS asks once for camera and microphone access. Call windows have no access to the app commands.
 
 ## Known limitations
 
-- **Calls in end-to-end encrypted chats are not available on macOS and Linux.** Facebook decides this on its servers for every WebKit-based browser, Safari included: the call buttons show "This browser doesn't support calls" even though the webview has the required WebRTC features. Windows uses the Chromium-based WebView2 and is not affected by this check. On macOS and Linux, hovering a call button shows "This app can't make this call" and clicking it opens the chat in the first Chromium-based browser found (Chrome, Edge, Brave, Arc, Chromium, Vivaldi, Opera), or in the default browser with a hint if there is none.
+- **Lite build only: calls in end-to-end encrypted chats are not available on macOS and Linux.** Facebook decides this on its servers for every WebKit-based browser, Safari included: the call buttons show "This browser doesn't support calls" even though the webview has the required WebRTC features. Windows uses the Chromium-based WebView2 and is not affected by this check. On macOS and Linux, hovering a call button shows "This app can't make this call" and clicking it opens the chat in the first Chromium-based browser found (Chrome, Edge, Brave, Arc, Chromium, Vivaldi, Opera), or in the default browser with a hint if there is none.
 - Facebook does not accept `.zip` attachments on the web (any browser); other archive formats are not blocked by that check.
 - Unread counting reads the chat list (unread rows are shown in bold), so it covers the conversations Messenger has loaded, which are the most recent ones.
-- Clicking a notification does not bring the app forward (the notification plugin does not support it).
+- Lite build only: clicking a notification does not bring the app forward (the notification plugin does not support it).
 - Links that open a new window go to the default browser; only Facebook's own pages (calls) open in an app window.
-- WebRTC calls on Linux (WebKitGTK) may be unreliable.
+- Lite build only: WebRTC calls on Linux (WebKitGTK) may be unreliable.
 - Facebook markup changes can break selectors until they are updated (see [Maintenance](#maintenance)).
 
 ## License
@@ -159,17 +142,20 @@ Messenger and Facebook are trademarks of Meta Platforms, Inc.
 **Tải bản cài** ở mục [Releases](https://github.com/bthanhtung/pure-messenger/releases):
 
 - **macOS:** tải file `.dmg`, mở ra rồi kéo Pure Messenger vào Applications. Lần đầu mở bị chặn thì vào System Settings → Privacy & Security, bấm **Open Anyway**.
-- **Windows:** tải file `..._x64-setup.exe` rồi chạy. Nếu SmartScreen cảnh báo, bấm **More info** → **Run anyway**.
+- **Windows:** tải file `Pure Messenger Setup ….exe` rồi chạy. Nếu SmartScreen cảnh báo, bấm **More info** → **Run anyway**.
 - **Ubuntu/Debian:** tải file `.deb`, chạy `sudo apt install ./<tên file>.deb`.
 - **Fedora:** tải file `.rpm`, chạy `sudo dnf install ./<tên file>.rpm`.
 - **Linux khác:** tải file `.AppImage`, chạy `chmod +x <tên file>.AppImage` rồi mở.
 
 **Sử dụng:**
 
-- Đăng nhập Facebook trong cửa sổ app. App không lưu tin nhắn.
+- Đăng nhập Facebook trong cửa sổ app, rồi nhập mã PIN Messenger khi được hỏi để khôi phục lịch sử chat mã hóa. App không lưu tin nhắn.
+- Gọi thoại và gọi video ngay trong app, kể cả chat mã hóa.
 - Giao diện sáng/tối mặc định theo cài đặt Chế độ tối của Facebook. Muốn ép theo macOS hay luôn sáng/tối thì chọn ở menu View → Appearance (macOS) hoặc menu ở khay hệ thống.
-- Cài đặt (thông báo, tự mở khi khởi động máy…): ⌘, trên macOS, Ctrl+, trên Windows/Linux.
+- Cài đặt (thông báo, tự mở khi khởi động máy…): ⌘, trên macOS, hoặc menu ở khay hệ thống.
 - Đăng xuất: menu Pure Messenger → Sign Out… (macOS), hoặc Sign Out… trong menu ở khay hệ thống.
 - Link profile, bài viết… sẽ mở bằng trình duyệt, app chỉ dùng để chat.
+
+**Bản Lite:** nhẹ hơn nhiều (khoảng 10 MB) nhưng không gọi được trong chat mã hóa trên macOS/Linux; xem nhánh [`main-lite`](https://github.com/bthanhtung/pure-messenger/tree/main-lite).
 
 **Giấy phép:** được dùng, sửa và chia sẻ miễn phí cho mục đích phi thương mại. Không được dùng vào mục đích thương mại.
