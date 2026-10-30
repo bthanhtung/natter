@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write      # signs the build provenance attestations
+  attestations: write
 
 jobs:
   build:
@@ -54,15 +56,40 @@ jobs:
       - run: npm test
       - run: npx tauri build ${{ matrix.args }}
 
+      # Each file gets a .sha256 next to it and a signed build provenance attestation, so anyone can
+      # check a download came from this repository: `gh attestation verify <file> --repo bthanhtung/natter`.
+      - name: Checksums
+        shell: bash
+        working-directory: ${{ matrix.out }}
+        run: |
+          for f in dmg/*.dmg nsis/*.exe msi/*.msi appimage/*.AppImage deb/*.deb; do
+            [ -f "$f" ] || continue
+            (cd "$(dirname "$f")" && b="$(basename "$f")" && { sha256sum "$b" 2>/dev/null || shasum -a 256 "$b"; } > "$b.sha256")
+          done
+
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            ${{ matrix.out }}/dmg/*.dmg
+            ${{ matrix.out }}/nsis/*.exe
+            ${{ matrix.out }}/msi/*.msi
+            ${{ matrix.out }}/appimage/*.AppImage
+            ${{ matrix.out }}/deb/*.deb
+
       - uses: actions/upload-artifact@v4
         with:
-          name: PureMessenger-${{ matrix.name }}
+          name: Natter-Lite-${{ matrix.name }}
           path: |
             ${{ matrix.out }}/dmg/*.dmg
             ${{ matrix.out }}/nsis/*.exe
             ${{ matrix.out }}/msi/*.msi
             ${{ matrix.out }}/appimage/*.AppImage
             ${{ matrix.out }}/deb/*.deb
+            ${{ matrix.out }}/dmg/*.dmg.sha256
+            ${{ matrix.out }}/nsis/*.exe.sha256
+            ${{ matrix.out }}/msi/*.msi.sha256
+            ${{ matrix.out }}/appimage/*.AppImage.sha256
+            ${{ matrix.out }}/deb/*.deb.sha256
           if-no-files-found: error
 
       # A v* tag publishes the bundles to a draft GitHub Release.
@@ -76,6 +103,11 @@ jobs:
             ${{ matrix.out }}/msi/*.msi
             ${{ matrix.out }}/appimage/*.AppImage
             ${{ matrix.out }}/deb/*.deb
+            ${{ matrix.out }}/dmg/*.dmg.sha256
+            ${{ matrix.out }}/nsis/*.exe.sha256
+            ${{ matrix.out }}/msi/*.msi.sha256
+            ${{ matrix.out }}/appimage/*.AppImage.sha256
+            ${{ matrix.out }}/deb/*.deb.sha256
 
   # The .rpm is built on Fedora itself so it links against Fedora's own libraries.
   fedora:
@@ -100,14 +132,34 @@ jobs:
       - run: npm test
       - run: npx tauri build --bundles rpm
 
+      # Each file gets a .sha256 next to it and a signed build provenance attestation, so anyone can
+      # check a download came from this repository: `gh attestation verify <file> --repo bthanhtung/natter`.
+      - name: Checksums
+        shell: bash
+        working-directory: src-tauri/target/release/bundle/rpm
+        run: |
+          for f in *.rpm; do
+            [ -f "$f" ] || continue
+            (cd "$(dirname "$f")" && b="$(basename "$f")" && { sha256sum "$b" 2>/dev/null || shasum -a 256 "$b"; } > "$b.sha256")
+          done
+
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            src-tauri/target/release/bundle/rpm/*.rpm
+
       - uses: actions/upload-artifact@v4
         with:
-          name: PureMessenger-Fedora
-          path: src-tauri/target/release/bundle/rpm/*.rpm
+          name: Natter-Lite-Fedora
+          path: |
+            src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/rpm/*.rpm.sha256
           if-no-files-found: error
 
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           draft: true
-          files: src-tauri/target/release/bundle/rpm/*.rpm
+          files: |
+            src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/rpm/*.rpm.sha256

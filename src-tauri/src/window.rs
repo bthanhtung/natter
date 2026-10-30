@@ -156,7 +156,7 @@ fn call_window(app: &AppHandle, features: NewWindowFeatures) -> tauri::Result<We
         label,
         WebviewUrl::External(Url::parse("about:blank").expect("static URL is valid")),
     )
-    .title("Pure Messenger Lite")
+    .title("Natter Lite")
     .inner_size(960.0, 640.0)
     .min_inner_size(400.0, 300.0)
     .theme(app.state::<SettingsStore>().get().theme.native())
@@ -204,7 +204,7 @@ pub fn create(app: &tauri::App) -> tauri::Result<()> {
                 .expect("static Messenger URL is valid"),
         ),
     )
-    .title("Pure Messenger Lite")
+    .title("Natter Lite")
     .inner_size(1100.0, 760.0)
     .min_inner_size(480.0, 400.0)
     .theme(theme.native())

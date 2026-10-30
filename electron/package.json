@@ -1,10 +1,10 @@
 {
-  "name": "pure-messenger-call",
-  "productName": "Pure Messenger",
-  "version": "0.1.4",
+  "name": "natter",
+  "productName": "Natter",
+  "version": "0.2.0",
   "private": true,
-  "description": "Chat-only Messenger desktop app on Chromium, with voice and video calls",
-  "license": "PolyForm-Noncommercial-1.0.0",
+  "description": "An unofficial desktop app for Facebook Messenger, on Chromium, with voice and video calls",
+  "license": "GPL-3.0-only",
   "main": "main.js",
   "scripts": {
     "prestart": "node sync-shared.js",
@@ -17,8 +17,8 @@
     "electron-builder": "^26.18.0"
   },
   "build": {
-    "appId": "dev.personal.puremessenger.call",
-    "productName": "Pure Messenger",
+    "appId": "io.github.bthanhtung.natter",
+    "productName": "Natter",
     "files": [
       "main.js",
       "preload.js",
@@ -40,9 +40,9 @@
       "category": "public.app-category.social-networking",
       "identity": "-",
       "extendInfo": {
-        "NSCameraUsageDescription": "Pure Messenger uses the camera for Messenger video calls.",
-        "NSMicrophoneUsageDescription": "Pure Messenger uses the microphone for Messenger calls and voice clips.",
-        "NSLocalNetworkUsageDescription": "Pure Messenger can connect calls directly to devices on your local network."
+        "NSCameraUsageDescription": "Natter uses the camera for Messenger video calls.",
+        "NSMicrophoneUsageDescription": "Natter uses the microphone for Messenger calls and voice clips.",
+        "NSLocalNetworkUsageDescription": "Natter can connect calls directly to devices on your local network."
       },
       "hardenedRuntime": false
     },

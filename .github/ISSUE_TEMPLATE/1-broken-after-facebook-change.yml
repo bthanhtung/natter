@@ -1,0 +1,43 @@
+name: Something stopped working
+description: A feature that used to work broke (badge, theme, layout, notifications…) — usually a Facebook change.
+labels: ["facebook-change"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! Facebook changes its page now and then; these reports help fix it fast.
+        **Please don't include anyone's messages, names or photos in screenshots** — blur or crop them.
+  - type: dropdown
+    id: app
+    attributes:
+      label: App
+      options: ["Natter (Chromium)", "Natter Lite"]
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: About Natter, or the file name you downloaded.
+      placeholder: "0.2.0"
+    validations: { required: true }
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: ["macOS", "Windows", "Ubuntu / Debian", "Fedora", "Other Linux"]
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes:
+      label: What stopped working?
+      placeholder: "The unread badge stays at 0 since yesterday."
+    validations: { required: true }
+  - type: input
+    id: language
+    attributes:
+      label: Facebook language
+      placeholder: "English (US), Tiếng Việt…"
+  - type: textarea
+    id: more
+    attributes:
+      label: Screenshots or details (optional)

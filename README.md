@@ -1,247 +1,216 @@
-# Pure Messenger
+<div align="center">
 
-A chat-only desktop app for Facebook Messenger on macOS, Windows and Linux, in the spirit of the former Messenger desktop app (discontinued by Meta in December 2025).
+<img src="src-tauri/icons/128x128@2x.png" width="96" alt="" />
 
-Pure Messenger shows Meta's own Messenger page (`facebook.com/messages`) in a native window and restyles it. It does not use unofficial APIs, scrape or automate anything, and it is not affiliated with or endorsed by Meta.
+# Natter
 
-> Tiếng Việt: xem [Hướng dẫn nhanh](#hướng-dẫn-nhanh-tiếng-việt) ở cuối trang.
+**An unofficial desktop app for Facebook Messenger** — on macOS, Windows and Linux.
 
-## Two versions, two branches
+Meta shut down the Messenger desktop app in December 2025. Natter brings back a calm, chat-only window:
+no feed, no notifications from the rest of Facebook, just your conversations.
 
-| | **Pure Messenger** | **Pure Messenger Lite** |
-|---|---|---|
-| Branch | [`main`](https://github.com/bthanhtung/pure-messenger/tree/main) | [`main-lite`](https://github.com/bthanhtung/pure-messenger/tree/main-lite) |
-| Engine | Chromium, via [Electron](https://www.electronjs.org) (`electron/`) | The system webview, via [Tauri](https://tauri.app) (`src-tauri/`): WebKit on macOS and Linux, WebView2 on Windows |
-| Voice and video calls | Everywhere, in the app, including end-to-end encrypted chats | Windows only. On macOS and Linux Facebook turns calls in encrypted chats off for WebKit; the call buttons then open the chat in Chrome, Edge or Brave |
-| Encrypted chats you have not opened yet | Up to date, as in Chrome | Can lag behind: Facebook's encryption worker runs at background priority in WebKit |
-| App size | about 490 MB (universal macOS), 100–200 MB elsewhere | about 10 MB |
-| Memory | like a Chrome tab | about 600 MB with a chat open, most of it Facebook's page |
-| App id / data folder | `dev.personal.puremessenger.call` | `dev.personal.puremessenger` |
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
+![macOS · Windows · Linux](https://img.shields.io/badge/platform-macOS%20·%20Windows%20·%20Linux-555?style=flat-square)
+![Not affiliated with Meta](https://img.shields.io/badge/unofficial-not%20affiliated%20with%20Meta-orange?style=flat-square)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
 
-**Which one?** Take **Pure Messenger** if you make calls or want every chat up to date. Take **Pure Messenger Lite** if you want the smallest app and mostly text.
+<img src="docs/demo.gif" alt="Natter: opening a chat, replying, dropping in a photo, a notification, and switching themes in Preferences" width="880" />
 
-Both look and behave the same: they share the injected script and style (`src-tauri/inject`), the Preferences page (`dist/preferences.html`) and the icons, and every change to those is kept identical on both branches. They have different app ids and data folders, so they can be installed side by side, each with its own sign-in.
+<sub>Demo with sample conversations.</sub>
 
-## Features
+</div>
 
-- **Chat only.** The window shows your chats, their media viewer and the sign-in steps, nothing else. Profiles, posts, groups and every other link open in your default browser, and Facebook's home feed is replaced by the chats.
-- **Desktop look.** Full-height panes with no page scrollbars or Facebook header. On macOS the title bar blends into the window and the chat list and the conversation float as rounded panels, after Apple's macOS 26 design; an optional glass window can be turned on in Preferences.
-- **Light on the page.** The app adds no work while you scroll, type or hover: themes are plain CSS, and the unread count runs only when Facebook retitles the page, at idle time.
-- **Themes.** By default the app follows Facebook's own Dark mode setting (Off, On or Automatic). System, Light, Grey, Dark (true black) and High contrast override it, without a reload.
-- **Unread badge** on the Dock or taskbar and in the menu bar or tray, counting unread conversations (not Facebook notifications).
-- **Files, photos and GIFs.** Send them with the attach button, by dragging them onto the window or by pasting. Downloads go to your Downloads folder, with a notification when they finish.
+## Why Natter
+
+- **Chat only.** Chats, their media viewer and sign-in. Profiles, posts and every other link open in your browser.
+- **Feels like a desktop app.** Full-height panes, no page scrollbars or Facebook header. On macOS the title bar blends in and the panes float like macOS 26 apps (optional glass window).
+- **Calls work**, including in end-to-end encrypted chats (Natter build).
+- **Unread badge** on the Dock / taskbar and in the menu bar / tray, counting unread conversations.
 - **Notifications** with Do not disturb, hidden previews and sound options.
-- **Menu bar / tray app.** Closing the window keeps it running (optional), and chats stay real time while it is hidden. Open at login (optional). A second launch focuses the running window.
-- **Sign-in checks stay in the app**, so captchas and Meta account steps verify the session you are signing in to.
+- **Themes:** follow Facebook, or force System, Light, Grey, true-black Dark or High contrast — without a reload.
+- **Files:** attach, drag in or paste photos and files; downloads go to your Downloads folder.
+- **Lives in the menu bar / tray** if you want it to, opens at login, single instance.
+- **Light:** no work while you scroll or type; the Lite build is about 10 MB.
 
-## Download and install
+## Natter or Natter Lite?
 
-Builds are attached to [GitHub Releases](https://github.com/bthanhtung/pure-messenger/releases), or to each run under [Actions](https://github.com/bthanhtung/pure-messenger/actions) (Artifacts section). File names start with `Pure Messenger` or `Pure Messenger Lite`.
+Both look and behave the same and can be installed side by side, each with its own sign-in.
+
+| | **Natter** | **Natter Lite** |
+|---|---|---|
+| Engine | Chromium ([Electron](https://www.electronjs.org)), in `electron/` | The system webview ([Tauri](https://tauri.app)), in `src-tauri/`: WebKit on macOS/Linux, WebView2 on Windows |
+| Voice & video calls | Everywhere, including encrypted chats | Windows only. On macOS/Linux, Facebook blocks calls in encrypted chats for WebKit; the call button opens the chat in Chrome, Edge or Brave |
+| Encrypted chats you haven't opened | Up to date | Can lag behind for a while |
+| Download size | 100–200 MB (macOS universal: ~490 MB) | ~10 MB |
+
+**Make calls? Take Natter. Mostly text and want it tiny? Take Natter Lite.**
+
+## How it compares
+
+| | **Natter** | **Natter Lite** | [Caprine](https://github.com/sindresorhus/caprine) 2.61 | Facebook installed from the browser |
+|---|---|---|---|---|
+| Works with today's Messenger (`facebook.com/messages`) | ✅ | ✅ | ❌ loads `messenger.com`; recent issues report sign-in, notification and call problems | ✅ |
+| Chat only (no feed, no Facebook notifications) | ✅ | ✅ | ✅ | ❌ the whole of Facebook |
+| Calls in encrypted chats | ✅ | Windows only | ❌ (call buttons reported broken) | ✅ |
+| Unread badge on Dock / taskbar | ✅ | ✅ | ✅ | ❌ |
+| Menu bar / tray, open at login | ✅ | ✅ | ✅ | ❌ |
+| Size | 100–490 MB | ~10 MB | 80–110 MB | none (uses your browser) |
+| Actively maintained | ✅ | ✅ | last release Jan 2026 | — |
+
+Caprine was the inspiration and served people well for years — thank you, Sindre and contributors.
+
+## Install
+
+Download from [**Releases**](https://github.com/bthanhtung/natter/releases). Files with `Lite` in their name are Natter Lite.
 
 | System | File | Install |
 |---|---|---|
-| macOS 13+ (Apple silicon and Intel) | `…universal.dmg` | Open it and drag the app to Applications. |
-| Windows 10/11 (64-bit) | `…Setup….exe` or `…x64-setup.exe` (Lite also has `.msi`) | Run it. |
-| Ubuntu / Debian (64-bit) | `….deb` | `sudo apt install ./<file>.deb` |
-| Fedora (64-bit) | `….rpm` | `sudo dnf install ./<file>.rpm` |
-| Other Linux (64-bit) | `….AppImage` | `chmod +x <file>.AppImage`, then run it. |
+| macOS 13+ (Apple silicon & Intel) | `.dmg` | Open it and drag the app to Applications |
+| Windows 10/11 (64-bit) | `.exe` (Lite also `.msi`) | Run it |
+| Ubuntu / Debian | `.deb` | `sudo apt install ./<file>.deb` |
+| Fedora | `.rpm` | `sudo dnf install ./<file>.rpm` |
+| Other Linux | `.AppImage` | `chmod +x <file>.AppImage`, then run it |
 
-The builds are not code-signed, so the first launch shows a warning:
+**The first launch shows a warning** because the builds are not code-signed (signing certificates cost money every year; this is a free side project):
 
-- **macOS:** open System Settings → Privacy & Security and click **Open Anyway** (or run `xattr -cr "/Applications/Pure Messenger.app"` once; use the Lite app's name for Lite).
-- **Windows:** in the SmartScreen dialog click **More info** → **Run anyway**.
-- **Linux:** an AppImage needs FUSE 2 (`libfuse2`, or `libfuse2t64` on Ubuntu 24.04). GNOME needs the AppIndicator extension to show the tray icon.
+- **macOS:** System Settings → Privacy & Security → **Open Anyway**, or run `xattr -cr "/Applications/Natter.app"` once.
+- **Windows:** in the SmartScreen dialog click **More info → Run anyway**.
+- **Linux:** an AppImage needs FUSE 2 (`libfuse2`, `libfuse2t64` on Ubuntu 24.04). On GNOME, the AppIndicator extension shows the tray icon.
 
-**First sign-in:** Facebook sees each install as a new device. Sign in, then enter your Messenger PIN when asked, so your encrypted chat history is restored.
+Prefer no warnings at all? [Build it yourself](#build-it-yourself) — apps you build on your own machine are not quarantined.
+
+**Verify your download.** Every release file comes with a `.sha256` checksum and a signed [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations) proving it was built by GitHub Actions from this repository:
+
+```sh
+shasum -a 256 -c "Natter Lite_0.2.0_universal.dmg.sha256"     # Windows: Get-FileHash <file>
+gh attestation verify "Natter Lite_0.2.0_universal.dmg" --repo bthanhtung/natter
+```
+
+**First sign-in:** Facebook sees each install as a new device. Sign in, then enter your Messenger PIN when asked so your encrypted chat history is restored.
 
 ## Using it
 
-- **Preferences:** ⌘, on macOS (app menu), Ctrl+, on Windows and Linux, or the menu bar / tray menu.
+- **Preferences:** ⌘, on macOS, Ctrl+, on Windows/Linux, or the menu bar / tray menu.
 - **Theme:** View → Appearance on macOS, or Appearance in the tray menu.
-- **Sign out:** app menu → Sign Out… on macOS, Sign Out… in the tray menu, or Preferences → Account. You are asked to confirm.
-- **Tray menu:** Show, Appearance, Preferences, Sign Out…, Quit. On Linux use the tray menu to show the window.
-- **Calls:** use the call buttons in a chat's header. The first call asks for camera and microphone access.
+- **Sign out:** app menu → Sign Out…, the tray menu, or Preferences → Account.
+- **Calls:** the call buttons in a chat's header. The first call asks for camera and microphone access.
 
-| Preference | Effect |
-|---|---|
-| Theme | Match Facebook (default), System, Light, Grey, Dark, High contrast |
-| Do not disturb | No desktop notifications |
-| Show previews | Show message text in notifications, or only "New message" |
-| Notification sounds | Play the system notification sound |
-| Open at login | Start the app when you sign in to your computer |
-| Keep running when closed | Closing the window hides it to the menu bar / tray instead of quitting |
-| Glass effect (macOS) | Translucent window; uses more graphics power; applies after restarting the app |
-| Sign out of Facebook | Removes the Facebook session from this computer (click twice to confirm) |
+## What Natter does — and doesn't
+
+Natter shows **Meta's own Messenger page** (`facebook.com/messages`) in a native window and restyles it with CSS and a small script. That's all.
+
+- ❌ No unofficial APIs, no scraping, no automation, no message reading or storage.
+- ❌ No analytics, telemetry, ads or servers of its own. The app talks to Facebook and nothing else.
+- ✅ Its only file is `settings.json`; your Facebook session lives in the app's own data folder and is never logged or sent anywhere.
+- ✅ The page can call only a handful of narrow app commands (unread badge, notification, theme, open link). Only the bundled Preferences window can read or change settings. In Lite this is enforced by Tauri capabilities scoped to HTTPS Facebook origins, and the app's own pages run under a strict Content Security Policy.
+- ✅ Links that aren't chats open in your default browser; captchas and Meta account checks stay in the app so they verify the right session.
+- ✅ Everything injected into the page is in two readable files: [`inject.js`](src-tauri/inject/inject.js) and [`inject.css`](src-tauri/inject/inject.css).
+
+## FAQ
+
+**Is this made by Meta?** No. Natter is an independent, unofficial project, not affiliated with or endorsed by Meta. Messenger and Facebook are trademarks of Meta Platforms, Inc.
+
+**Can my account get banned?** Natter loads the same page you'd open in a browser, with a regular browser user agent, and doesn't automate anything, so to Facebook it looks like a browser tab. As with any third-party app, there is no guarantee.
+
+**Why does it need a newer build sometimes?** Facebook changes its page now and then. When something stops working (badge, theme, layout), it's usually one selector to update — [report it](https://github.com/bthanhtung/natter/issues/new/choose) or [fix it](CONTRIBUTING.md#when-facebook-changes-something).
+
+**I used Pure Messenger.** That was Natter's old name. Natter (Chromium) moves your old session over on first launch; Natter Lite asks you to sign in once.
 
 ## Build it yourself
 
-### 1. Get the code
-
 ```sh
-git clone https://github.com/bthanhtung/pure-messenger.git
-cd pure-messenger
-git checkout main        # Pure Messenger (Chromium)
-# or
-git checkout main-lite   # Pure Messenger Lite (system webview)
+git clone https://github.com/bthanhtung/natter.git
+cd natter
 ```
 
-Each system builds its own bundles: build on macOS for macOS, on Windows for Windows and on Linux for Linux (or use the GitHub Actions workflows below).
+Each system builds its own installers: build on macOS for macOS, on Windows for Windows, on Linux for Linux.
 
-### 2a. Pure Messenger (branch `main`)
+### Natter (Chromium)
 
-Requirements on every system: [Node.js](https://nodejs.org) 20 or later, with npm.
-
-| System | Also needed |
-|---|---|
-| macOS 13+ | Nothing else. |
-| Windows 10/11 | Nothing else (use PowerShell or Command Prompt). |
-| Ubuntu / Debian | `sudo apt install rpm` only if you also want the `.rpm` |
-| Fedora | `sudo dnf install rpm-build` only if you also want the `.rpm` |
+Needs [Node.js](https://nodejs.org) 20+. On Linux, `rpm` (Debian/Ubuntu) or `rpm-build` (Fedora) only if you also want the `.rpm`.
 
 ```sh
 cd electron
 npm install
-npm start          # run it from source
-npm run build      # make the installers for this system, in electron/dist
+npm start          # run from source
+npm run build      # installers in electron/dist
 ```
 
-| System | `npm run build` makes |
-|---|---|
-| macOS | `electron/dist/Pure Messenger-<version>-universal.dmg` (Apple silicon and Intel, ad-hoc signed). `npm run build -- --mac --arm64` builds for Apple silicon only, faster. |
-| Windows | `electron/dist/Pure Messenger Setup <version>.exe` |
-| Linux | `electron/dist/` `.AppImage`, `.deb` and `.rpm` |
+On macOS `npm run build -- --mac --arm64` builds for Apple silicon only, which is faster.
 
-`npm start` and `npm run build` first copy the shared files (`src-tauri/inject`, `dist/preferences.html`, the icons) into `electron/shared`. `PM_DEBUG=1 npm start` prints the injected script's state and page errors.
+### Natter Lite (Tauri)
 
-### 2b. Pure Messenger Lite (branch `main-lite`)
-
-Requirements on every system: [Rust](https://rustup.rs) (stable, installed with rustup) and [Node.js](https://nodejs.org) 20 or later, with npm.
+Needs [Rust](https://rustup.rs) (stable) and [Node.js](https://nodejs.org) 20+, plus:
 
 | System | Also needed |
 |---|---|
-| macOS 13+ | Xcode Command Line Tools: `xcode-select --install` |
-| Windows 10/11 | [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development with C++"; WebView2 (preinstalled on Windows 11) |
+| macOS 13+ | `xcode-select --install` |
+| Windows 10/11 | [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with "Desktop development with C++" (WebView2 ships with Windows 11) |
 | Ubuntu / Debian | `sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev` |
 | Fedora | `sudo dnf install webkit2gtk4.1-devel gcc-c++ curl wget file libxdo-devel openssl-devel libappindicator-gtk3-devel librsvg2-devel rpm-build` |
 
 ```sh
 npm install
-npm run dev        # run it from source
-npm test           # injected-script tests and Rust unit tests
-npm run build      # make the installers for this system
+npm run dev        # run from source
+npm test           # injected-script tests + Rust unit tests
+npm run build      # installers in src-tauri/target/release/bundle
 ```
 
-Bundles are written to `src-tauri/target/release/bundle/`: `.app` and `.dmg` on macOS, `.exe` and `.msi` on Windows, `.deb`, `.rpm` and `.AppImage` on Linux. For one macOS build that runs on Apple silicon and Intel:
+One macOS build for Apple silicon and Intel: `rustup target add x86_64-apple-darwin && npm run tauri build -- --target universal-apple-darwin`.
 
-```sh
-rustup target add x86_64-apple-darwin
-npm run tauri build -- --target universal-apple-darwin
-```
+### Build on GitHub
 
-### 3. Build on GitHub instead
+The [Build Chromium](.github/workflows/build-call.yml) and [Build Lite](.github/workflows/build.yml) workflows run only when started by hand (**Actions → workflow → Run workflow**). Started on a `v*` tag, they attach the installers, checksums and attestations to a draft release.
 
-Both workflows run only when started by hand, to save Actions minutes (macOS runners count 10×): **Actions → workflow → Run workflow**, then pick the branch or a tag. Started on a `v*` tag, a run also attaches the installers to a draft GitHub Release.
+## Project layout
 
-| Workflow | Branch | Builds |
-|---|---|---|
-| [Build Chromium](.github/workflows/build-call.yml) | `main` | Pure Messenger for macOS (universal `.dmg`), Windows (`.exe`) and Linux (`.AppImage`, `.deb`, `.rpm`) |
-| [Build Lite](.github/workflows/build.yml) | `main-lite` (or `main`) | Pure Messenger Lite for macOS (universal `.dmg`), Windows (`.exe`, `.msi`), Ubuntu (`.deb`, `.AppImage`) and Fedora (`.rpm`) |
-
-Tags: `v<version>` for Pure Messenger on `main`, `v<version>-lite` for Pure Messenger Lite on `main-lite`.
-
-## How it works
-
-| Path | Role |
+| Path | What it is |
 |---|---|
-| `electron/main.js` | Pure Messenger: window, navigation rules (chat stays in, the rest goes to the browser), call windows, permissions, menu bar and tray, menus, notifications, settings. |
-| `electron/preload.js` | Pure Messenger: gives the page the same `invoke` bridge as Lite and runs the injected script before Facebook's scripts. |
-| `src-tauri/src/window.rs` | Lite: window, glass effect and title bar; navigation rules; call windows. |
-| `src-tauri/src/commands.rs` | Lite: the native commands the page may call (unread badge, notifications, theme, Preferences, open in browser). |
-| `src-tauri/src/settings.rs`, `tray.rs`, `browser.rs` | Lite: settings and Appearance menus, menu bar / tray, handing calls to a Chromium browser. |
-| `src-tauri/inject/inject.js` | Both: runs in the Messenger page — themes, layout mode, link routing, unread count, notification bridge. |
-| `src-tauri/inject/inject.css` | Both: layout, glass and theme styles. |
-| `dist/preferences.html` | Both: the Preferences window. |
-| `src-tauri/icons` | Both: app, menu bar and tray icons; SVG sources in `src-tauri/icons/source`. |
+| `src-tauri/inject/inject.js`, `inject.css` | **Shared.** Runs inside the Messenger page: themes, layout, link routing, unread count, notifications. Most fixes land here. |
+| `dist/preferences.html` | **Shared.** The Preferences window. |
+| `src-tauri/icons/` | **Shared.** App, menu bar and tray icons (SVG sources in `source/`). |
+| `src-tauri/src/` | **Lite.** Window and navigation rules (`window.rs`), app commands (`commands.rs`), settings, tray, handing calls to a browser. |
+| `electron/` | **Natter.** `main.js` (window, navigation, calls, permissions, tray, menus), `preload.js` (the same `invoke` bridge as Lite). `sync-shared.js` copies the shared files in before running or packaging. |
 
-### Maintenance
-
-Facebook changes its markup from time to time. Everything that depends on it is kept in one place:
-
-- `SELECTORS`, `CHAT_PATH`/`AUTH_PATH` and `FB_MODE` in `src-tauri/inject/inject.js`;
-- the theme color variables in `src-tauri/inject/inject.css`;
-- the user agents: Pure Messenger presents Electron's own Chrome user agent without the Electron token (`electron/main.js`); Lite's `UA` strings are in `src-tauri/src/window.rs` (keep WebKit on a Safari fingerprint and WebView2 on Edge).
-
-Themes read Facebook's own light and dark color variables from the page and apply the chosen set with CSS, so nothing watches the page's DOM for theme changes. Pane heights use viewport units, never percentages, which keeps WebKit's re-layout for each new message cheap.
-
-When you change a shared file (`src-tauri/inject`, `dist/preferences.html`, `src-tauri/icons`, `README.md`), make the same change on both branches.
-
-### Resource use
-
-Lite, measured idle on macOS with a chat open: the app process uses about 26 MB of memory, 7 threads and no CPU. Nearly everything else is Facebook's own page: about 400 MB for Messenger and about 130 MB for Facebook's end-to-end encryption engine (a hidden `fbsbx.com/maw_proxy_page` frame and a SharedWorker), which is required for encrypted chats. The page keeps running while the window is hidden, so messages and notifications arrive in real time.
-
-## Privacy and security
-
-- The app stores no messages. Its only file is `settings.json`; the Facebook session lives in the app's own data folder. No cookies or session values are logged or sent anywhere.
-- The Messenger page can call only a handful of app commands, checked against the window that sent them; only the bundled Preferences window can read or change preferences. In Lite these are scoped by Tauri capabilities to HTTPS Facebook origins.
-- Other sites and non-chat Facebook pages open in the default browser; captchas and Meta account pages used by sign-in checks stay in the app.
-- Camera, microphone and screen sharing are granted to Facebook pages for calls and voice clips; macOS asks once for camera and microphone access. Call windows have no access to the app commands.
-- Pure Messenger turns off Chromium's Cast discovery and WebRTC's mDNS names, so macOS does not ask for Local Network access; calls connect through Facebook's servers.
+More in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Known limitations
 
-- **Lite only:** calls in end-to-end encrypted chats are not available on macOS and Linux. Facebook decides this on its servers for every WebKit browser, Safari included. Hovering a call button shows "This app can't make this call"; clicking it opens the chat in the first Chromium-based browser found (Chrome, Edge, Brave, Arc, Chromium, Vivaldi, Opera).
-- **Lite only:** encrypted chats you have not opened since the app started can show older messages for a while (see the table above).
-- Facebook does not accept `.zip` attachments on the web (any browser); other archive formats are not blocked by that check.
-- Unread counting reads the chat list (unread rows are bold), so it covers the conversations Messenger has loaded, which are the most recent ones.
-- Pure Messenger cannot use passkeys to sign in (Electron does not support them); use your password.
-- Facebook markup changes can break selectors until they are updated (see [Maintenance](#maintenance)).
+- **Lite on macOS/Linux:** no calls in encrypted chats (Facebook's decision for every WebKit browser, Safari included); encrypted chats you haven't opened can show older messages for a while.
+- Facebook doesn't accept `.zip` attachments on the web, in any browser.
+- The unread count covers the conversations Messenger has loaded (the most recent ones).
+- Natter (Chromium) can't sign in with passkeys (an Electron limitation); use your password.
+
+## Contributing
+
+Bug reports, fixes and ideas are very welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and the [good first issues](https://github.com/bthanhtung/natter/labels/good%20first%20issue). Please read the [Code of Conduct](CODE_OF_CONDUCT.md). Security issues: see [SECURITY.md](SECURITY.md).
 
 ## License
 
-[PolyForm Noncommercial 1.0.0](LICENSE). You may use, copy, modify and share Pure Messenger for any noncommercial purpose, such as personal use, study, or use by charities and educational institutions. Commercial use is not permitted. Keep the `Required Notice` line from the [LICENSE](LICENSE) file when you share it.
+[GPL-3.0](LICENSE). You can use, study, change and share Natter freely; if you distribute a modified version, share its source under the same license.
 
-Messenger and Facebook are trademarks of Meta Platforms, Inc.
+---
 
 ## Hướng dẫn nhanh (tiếng Việt)
 
-**Hai phiên bản, hai nhánh:**
+**Natter** là app Messenger không chính thức cho máy tính (macOS, Windows, Linux), thay cho app Messenger desktop mà Meta đã khai tử từ 12/2025. Chỉ có chat — không bảng tin, không thông báo Facebook khác.
 
-| | **Pure Messenger** (nhánh `main`) | **Pure Messenger Lite** (nhánh `main-lite`) |
+| | **Natter** | **Natter Lite** |
 |---|---|---|
 | Nhân | Chromium (Electron) | WebView của hệ điều hành (Tauri) |
-| Gọi thoại / video | Gọi được ở mọi đoạn chat, kể cả chat mã hóa | Chỉ Windows; trên macOS/Linux bấm gọi sẽ mở Chrome/Edge/Brave |
-| Dung lượng | khoảng 490 MB (macOS) | khoảng 10 MB |
+| Gọi thoại / video | Gọi được mọi đoạn chat, kể cả chat mã hoá | Chỉ Windows; trên macOS/Linux bấm gọi sẽ mở Chrome/Edge/Brave |
+| Dung lượng | 100–490 MB | khoảng 10 MB |
 
-Hay gọi điện hoặc muốn mọi đoạn chat luôn mới nhất thì dùng **Pure Messenger**; cần nhẹ nhất, chủ yếu nhắn tin thì dùng **Lite**. Hai bản cài song song được, mỗi bản đăng nhập riêng.
+**Cài đặt:** tải ở [Releases](https://github.com/bthanhtung/natter/releases).
 
-**Cài đặt:** tải ở mục [Releases](https://github.com/bthanhtung/pure-messenger/releases).
+- **macOS:** mở `.dmg`, kéo app vào Applications. Lần đầu bị chặn thì vào System Settings → Privacy & Security → **Open Anyway** (app chưa ký số vì chứng chỉ tốn phí hằng năm).
+- **Windows:** chạy `.exe`; nếu SmartScreen cảnh báo, bấm **More info → Run anyway**.
+- **Ubuntu/Debian:** `sudo apt install ./<file>.deb` · **Fedora:** `sudo dnf install ./<file>.rpm` · **Linux khác:** `chmod +x <file>.AppImage` rồi mở.
 
-- **macOS:** mở file `.dmg`, kéo app vào Applications. Lần đầu mở bị chặn thì vào System Settings → Privacy & Security, bấm **Open Anyway**.
-- **Windows:** chạy file `.exe`. Nếu SmartScreen cảnh báo, bấm **More info** → **Run anyway**.
-- **Ubuntu/Debian:** `sudo apt install ./<tên file>.deb`. **Fedora:** `sudo dnf install ./<tên file>.rpm`. **Linux khác:** `chmod +x <tên file>.AppImage` rồi mở.
+**An toàn:** app chỉ hiển thị trang Messenger chính chủ của Facebook, không dùng API lậu, không tự động hoá, không đọc hay lưu tin nhắn, không gửi dữ liệu đi đâu khác. Toàn bộ phần chèn vào trang nằm ở `src-tauri/inject/`. Muốn chắc chắn hơn thì tự build từ mã nguồn (hướng dẫn ở trên) — app tự build sẽ không bị cảnh báo.
 
-**Sử dụng:**
+**Sử dụng:** đăng nhập Facebook trong app, nhập mã PIN Messenger để khôi phục chat mã hoá. Cài đặt: ⌘, (macOS) hoặc Ctrl+, (Windows/Linux).
 
-- Đăng nhập Facebook trong app, rồi nhập mã PIN Messenger khi được hỏi để khôi phục lịch sử chat mã hóa. App không lưu tin nhắn.
-- Cài đặt: ⌘, trên macOS hoặc menu ở thanh menu / khay hệ thống. Giao diện sáng/tối mặc định theo cài đặt Chế độ tối của Facebook; muốn ép sáng/tối thì chọn ở View → Appearance.
-- Đăng xuất: menu app → Sign Out… hoặc Sign Out… trong menu ở khay hệ thống.
-- Link profile, bài viết… mở bằng trình duyệt; app chỉ dùng để chat.
+**Đóng góp:** rất hoan nghênh! Xem [CONTRIBUTING.md](CONTRIBUTING.md) và các issue gắn nhãn [good first issue](https://github.com/bthanhtung/natter/labels/good%20first%20issue).
 
-**Tự build từ mã nguồn:**
-
-```sh
-git clone https://github.com/bthanhtung/pure-messenger.git
-cd pure-messenger
-
-# Pure Messenger (Chromium): chỉ cần Node.js 20+
-git checkout main
-cd electron && npm install && npm run build      # file cài nằm ở electron/dist
-
-# Pure Messenger Lite: cần Rust (rustup) + Node.js 20+ và thư viện hệ thống (xem mục 2b ở trên)
-git checkout main-lite
-npm install && npm run build                     # file cài nằm ở src-tauri/target/release/bundle
-```
-
-Build trên máy nào thì ra bản cho hệ điều hành đó (macOS, Windows hoặc Linux).
-
-**Giấy phép:** được dùng, sửa và chia sẻ miễn phí cho mục đích phi thương mại. Không được dùng vào mục đích thương mại.
+**Giấy phép:** GPL-3.0 — dùng, sửa, chia sẻ tự do; nếu phát hành bản sửa đổi thì phải công khai mã nguồn theo cùng giấy phép.

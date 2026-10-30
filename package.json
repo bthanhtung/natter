@@ -1,7 +1,7 @@
 {
-  "name": "puremessenger",
+  "name": "natter-lite",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.2.0",
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build",
@@ -11,5 +11,5 @@
   "devDependencies": {
     "@tauri-apps/cli": "^2"
   },
-  "license": "PolyForm-Noncommercial-1.0.0"
+  "license": "GPL-3.0-only"
 }

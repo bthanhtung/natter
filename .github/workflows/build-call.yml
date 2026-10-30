@@ -1,12 +1,14 @@
 name: Build Chromium
 
-# Pure Messenger on Chromium (Electron). Manual only, to save Actions minutes; macOS runners
+# Natter on Chromium (Electron). Manual only, to save Actions minutes; macOS runners
 # count 10x. A run started on a v* tag publishes the bundles to a draft GitHub Release.
 on:
   workflow_dispatch:
 
 permissions:
   contents: write
+  id-token: write      # signs the build provenance attestations
+  attestations: write
 
 jobs:
   build:
@@ -45,15 +47,40 @@ jobs:
       - run: node --test ../src-tauri/inject/inject.test.mjs
       - run: npm run build -- ${{ matrix.args }} --publish never
 
+      # Each file gets a .sha256 next to it and a signed build provenance attestation, so anyone can
+      # check a download came from this repository: `gh attestation verify <file> --repo bthanhtung/natter`.
+      - name: Checksums
+        shell: bash
+        working-directory: electron/dist
+        run: |
+          for f in *.dmg *.exe *.AppImage *.deb *.rpm; do
+            [ -f "$f" ] || continue
+            (cd "$(dirname "$f")" && b="$(basename "$f")" && { sha256sum "$b" 2>/dev/null || shasum -a 256 "$b"; } > "$b.sha256")
+          done
+
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            electron/dist/*.dmg
+            electron/dist/*.exe
+            electron/dist/*.AppImage
+            electron/dist/*.deb
+            electron/dist/*.rpm
+
       - uses: actions/upload-artifact@v4
         with:
-          name: PureMessenger-Chromium-${{ matrix.name }}
+          name: Natter-${{ matrix.name }}
           path: |
             electron/dist/*.dmg
             electron/dist/*.exe
             electron/dist/*.AppImage
             electron/dist/*.deb
             electron/dist/*.rpm
+            electron/dist/*.dmg.sha256
+            electron/dist/*.exe.sha256
+            electron/dist/*.AppImage.sha256
+            electron/dist/*.deb.sha256
+            electron/dist/*.rpm.sha256
           if-no-files-found: error
 
       - uses: softprops/action-gh-release@v2
@@ -66,3 +93,8 @@ jobs:
             electron/dist/*.AppImage
             electron/dist/*.deb
             electron/dist/*.rpm
+            electron/dist/*.dmg.sha256
+            electron/dist/*.exe.sha256
+            electron/dist/*.AppImage.sha256
+            electron/dist/*.deb.sha256
+            electron/dist/*.rpm.sha256

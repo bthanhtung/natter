@@ -1,4 +1,4 @@
-// The Chromium (Electron) build of Pure Messenger. Facebook allows calls in
+// The Chromium (Electron) build of Natter. Facebook allows calls in
 // end-to-end encrypted chats only in Chromium-based browsers, so this build can call where the
 // WebKit build (src-tauri) cannot. It reuses that build's injected script and style
 // (src-tauri/inject) and its Preferences page (dist/preferences.html).
@@ -169,7 +169,7 @@ function createMainWindow() {
     if (settings.closeToTray) mainWindow.hide();
     else quit();
   });
-  if (process.env.PM_DEBUG) {
+  if (process.env.NATTER_DEBUG) {
     mainWindow.webContents.on("console-message", event => {
       if (event.level === "error") console.log(`[page error] ${String(event.message).slice(0, 160)}`);
     });
@@ -437,12 +437,14 @@ function setUpSession() {
 
 // Facebook treats an "Electron" user agent as an unknown browser; present plain Chrome.
 // Data lives in a folder named after the app id, not the display name, so a rename keeps the
-// session; the folder of the earlier "Pure Messenger Call" name moves there once.
+// session; the folder of an earlier name (Pure Messenger, Pure Messenger Call) moves there once.
 {
   const appData = app.getPath("appData");
-  const dir = path.join(appData, "dev.personal.puremessenger.call");
-  const earlier = path.join(appData, "Pure Messenger Call");
-  if (!fs.existsSync(dir) && fs.existsSync(earlier)) {
+  const dir = path.join(appData, "io.github.bthanhtung.natter");
+  const earlier = ["dev.personal.puremessenger.call", "Pure Messenger Call"]
+    .map(name => path.join(appData, name))
+    .find(folder => fs.existsSync(folder));
+  if (!fs.existsSync(dir) && earlier) {
     try {
       fs.renameSync(earlier, dir);
     } catch (_) {}

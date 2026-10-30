@@ -101,9 +101,9 @@ pub fn set_unread(
         let _ = tray.set_icon_as_template(crate::tray::TEMPLATE);
         #[cfg(any(target_os = "linux", target_os = "windows"))]
         let _ = tray.set_tooltip(Some(if count > 0 {
-            format!("Pure Messenger Lite — {count} unread")
+            format!("Natter Lite — {count} unread")
         } else {
-            "Pure Messenger Lite".to_owned()
+            "Natter Lite".to_owned()
         }));
     }
     Ok(())
@@ -210,7 +210,7 @@ pub fn confirm_sign_out(app: &tauri::AppHandle) {
     let handle = app.clone();
     let dialog = app
         .dialog()
-        .message("You will need to sign in to Facebook again to use Pure Messenger Lite.")
+        .message("You will need to sign in to Facebook again to use Natter Lite.")
         .title("Sign out of Facebook?")
         .kind(MessageDialogKind::Warning)
         .buttons(MessageDialogButtons::OkCancelCustom(
