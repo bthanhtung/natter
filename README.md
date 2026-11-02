@@ -116,8 +116,6 @@ Natter shows **Meta's own Messenger page** (`facebook.com/messages`) in a native
 
 **Why does it need a newer build sometimes?** Facebook changes its page now and then. When something stops working (badge, theme, layout), it's usually one selector to update — [report it](https://github.com/bthanhtung/natter/issues/new/choose) or [fix it](CONTRIBUTING.md#when-facebook-changes-something).
 
-**I used Pure Messenger.** That was Natter's old name. Natter (Chromium) moves your old session over on first launch; Natter Lite asks you to sign in once.
-
 ## Build it yourself
 
 ```sh

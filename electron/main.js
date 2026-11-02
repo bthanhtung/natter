@@ -436,21 +436,8 @@ function setUpSession() {
 // --- Start ----------------------------------------------------------------------------------------
 
 // Facebook treats an "Electron" user agent as an unknown browser; present plain Chrome.
-// Data lives in a folder named after the app id, not the display name, so a rename keeps the
-// session; the folder of an earlier name (Pure Messenger, Pure Messenger Call) moves there once.
-{
-  const appData = app.getPath("appData");
-  const dir = path.join(appData, "io.github.bthanhtung.natter");
-  const earlier = ["dev.personal.puremessenger.call", "Pure Messenger Call"]
-    .map(name => path.join(appData, name))
-    .find(folder => fs.existsSync(folder));
-  if (!fs.existsSync(dir) && earlier) {
-    try {
-      fs.renameSync(earlier, dir);
-    } catch (_) {}
-  }
-  app.setPath("userData", dir);
-}
+// Data lives in a folder named after the app id, not the display name, so a rename keeps the session.
+app.setPath("userData", path.join(app.getPath("appData"), "io.github.bthanhtung.natter"));
 
 // Without these Chromium sends multicast on the local network (Cast device discovery, and mDNS
 // names that hide local IPs in WebRTC), which makes macOS ask for Local Network access at launch.

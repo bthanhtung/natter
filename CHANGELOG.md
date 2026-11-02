@@ -13,6 +13,3 @@ The first release of Natter, an unofficial desktop app for Facebook Messenger. I
 - Lite: strict Content Security Policy for the app's own pages.
 - Builds for macOS, Windows, Ubuntu, Debian, Fedora and Arch Linux, with a `.sha256` checksum for every file.
 - License: GPL-3.0.
-
-Natter continues a personal project called Pure Messenger: Natter moves its session over on first
-launch, and Natter Lite asks you to sign in once.
