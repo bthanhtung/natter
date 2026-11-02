@@ -6,8 +6,8 @@
   <title>Natter: an unofficial desktop app for Messenger</title>
   <meta name="description" content="Natter brings back a calm, chat-only Messenger window on macOS, Windows and Linux. Calls, notifications and an unread badge, with no feed. Free and unofficial.">
   <link rel="canonical" href="https://natter.tungdadev.com/">
-  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/icon-256.png">
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/icon-256.png">
   <meta property="og:title" content="Natter">
   <meta property="og:description" content="A calm, chat-only Messenger window on macOS, Windows and Linux.">
   <meta property="og:url" content="https://natter.tungdadev.com/">
@@ -15,98 +15,10 @@
   <meta property="og:image" content="https://natter.tungdadev.com/assets/icon-256.png">
   <meta name="twitter:card" content="summary">
   <meta name="theme-color" content="#2f7bf6">
-  <link rel="stylesheet" href="assets/site.css">
+  <script src="/theme-init.js"></script>
 </head>
 <body>
-  <a class="skip" href="#main" data-t="skip">Skip to content</a>
-  <header class="top">
-    <a class="brand" href="#main"><img src="assets/icon.svg" alt="" width="28" height="28"><span>Natter</span></a>
-    <nav aria-label="Page">
-      <a href="#features" data-t="navFeatures">Features</a>
-      <a href="#download" data-t="navDownload">Download</a>
-      <a href="#faq" data-t="navFaq">FAQ</a>
-      <a class="source" href="https://github.com/bthanhtung/natter" hidden>GitHub</a>
-      <button id="lang" type="button" aria-label="Tiếng Việt">VI</button>
-    </nav>
-  </header>
-
-  <main id="main">
-    <section class="hero">
-      <div class="hero-copy">
-        <h1 data-t="heroTitle">Messenger on your desktop, without the rest of Facebook.</h1>
-        <p class="lede" data-t="heroLede">Meta shut down the Messenger desktop app in December 2025. Natter brings back a calm window that holds your chats and nothing else.</p>
-        <div class="cta">
-          <a class="button primary" id="primary" href="#download" data-t="ctaAll">See all downloads</a>
-          <p class="cta-note" id="primary-note"></p>
-        </div>
-        <p class="fine" data-t="heroFine">Free. Unofficial, and not affiliated with Meta.</p>
-      </div>
-      <figure class="stage">
-        <img src="assets/demo.gif" width="880" height="550" alt="Natter on macOS: a chat is opened, a photo is dropped in, a notification arrives and the theme changes.">
-        <figcaption data-t="demoCaption">Demo with sample conversations.</figcaption>
-      </figure>
-    </section>
-
-    <section class="features" id="features">
-      <h2 data-t="featuresTitle">It does one job.</h2>
-      <ul>
-        <li><h3 data-t="f1">Chats only</h3><p data-t="f1d">No feed, no reels, no Facebook header. Profiles and posts open in your browser.</p></li>
-        <li><h3 data-t="f2">Voice and video calls</h3><p data-t="f2d">Natter calls in every chat, end-to-end encrypted ones included.</p></li>
-        <li><h3 data-t="f3">An unread badge you can trust</h3><p data-t="f3d">On the Dock or taskbar and in the tray, counting conversations.</p></li>
-        <li><h3 data-t="f4">Notifications on your terms</h3><p data-t="f4d">Do not disturb, hidden previews and your choice of sounds.</p></li>
-        <li><h3 data-t="f5">Themes</h3><p data-t="f5d">Follow Facebook or force System, Light, Grey, true-black Dark or High contrast, without a reload.</p></li>
-        <li><h3 data-t="f6">Stays out of the way</h3><p data-t="f6d">Lives in the menu bar or tray, opens at login, and attaches files by drag, drop or paste.</p></li>
-      </ul>
-    </section>
-
-    <section class="download" id="download">
-      <div class="download-head">
-        <h2 data-t="downloadTitle">Download</h2>
-        <p id="release-state" role="status" data-t="loading">Checking the latest release…</p>
-      </div>
-      <div class="choose">
-        <div><h3>Natter</h3><p data-t="natterPitch">Runs on Chromium. Take this one if you make calls.</p></div>
-        <div><h3>Natter Lite</h3><p data-t="litePitch">Runs on your system's webview, about 10 MB. On macOS and Linux, calls in encrypted chats open in your browser.</p></div>
-      </div>
-      <table>
-        <thead><tr><th scope="col" data-t="colSystem">System</th><th scope="col">Natter</th><th scope="col">Natter Lite</th></tr></thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <p class="fine" data-t="unsigned">Builds aren't code-signed yet, so the first launch shows a warning. On macOS use System Settings → Privacy &amp; Security → Open Anyway. On Windows click More info → Run anyway.</p>
-    </section>
-
-    <section class="trust">
-      <h2 data-t="trustTitle">What Natter does with your account</h2>
-      <div class="columns">
-        <div>
-          <h3 data-t="doesTitle">It shows Meta's own page</h3>
-          <p data-t="doesText">Natter opens facebook.com/messages in a native window, restyles it with CSS and a small script, and passes notifications to your system. Your session stays in the app's own data folder.</p>
-        </div>
-        <div>
-          <h3 data-t="doesntTitle">It stays out of everything else</h3>
-          <ul class="plain">
-            <li data-t="n1">No changes to Facebook's code</li>
-            <li data-t="n2">No scraping or automation</li>
-            <li data-t="n3">No reading or storing of messages</li>
-            <li data-t="n4">No analytics, ads or servers of its own</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="faq" id="faq">
-      <h2 data-t="faqTitle">Questions</h2>
-      <details><summary data-t="q1">Is this made by Meta?</summary><p data-t="a1">No. Natter is an independent project, not affiliated with or endorsed by Meta.</p></details>
-      <details><summary data-t="q2">Can my account get banned?</summary><p data-t="a2">Natter loads the same page you'd open in a browser and automates nothing. As with any third-party app, there is no guarantee.</p></details>
-      <details><summary data-t="q3">Which one should I pick?</summary><p data-t="a3">Natter if you make calls. Natter Lite if you mostly text and want it tiny. They can sit side by side, each with its own sign-in.</p></details>
-      <details><summary data-t="q4">Why sign in again and enter a PIN?</summary><p data-t="a4">Facebook sees each install as a new device. Your Messenger PIN restores your encrypted chat history.</p></details>
-    </section>
-  </main>
-
-  <footer class="foot">
-    <p data-t="footer">Natter is an unofficial project. Messenger and Facebook are trademarks of Meta Platforms, Inc.</p>
-    <p>GPL-3.0 · <a href="https://tungdadev.com">tungdadev.com</a></p>
-  </footer>
-  <script type="module" src="assets/site.js"></script>
+  <div id="root"><!--app-html--></div>
+  <script type="module" src="/src/entry-client.tsx"></script>
 </body>
 </html>

@@ -1,0 +1,198 @@
+@import "tailwindcss";
+
+/* ---------- Tokens ---------- */
+:root {
+  color-scheme: light dark;
+  --background: #fbfbfd;
+  --foreground: #1d1d1f;
+  --card: #ffffff;
+  --muted: #f1f2f6;
+  --muted-foreground: #5a6170;
+  --border: #e1e4eb;
+  --ring: #1f6fe8;
+  --link: #1a50c0;
+  --accent-soft: #e8f0fe;
+  --shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 12px 32px -8px rgb(16 24 40 / 0.1);
+  --shadow-lg: 0 2px 4px rgb(16 24 40 / 0.04), 0 40px 80px -24px rgb(16 40 120 / 0.28);
+  --nav-bg: rgb(251 251 253 / 0.78);
+  --grad-from: #2a93e0;
+  --grad-via: #2f7bf6;
+  --grad-to: #2442d8;
+  --success: #136a35;
+  --danger: #b42318;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #09090b;
+    --foreground: #f5f5f7;
+    --card: #141417;
+    --muted: #1b1b20;
+    --muted-foreground: #a3a8b5;
+    --border: #2a2b31;
+    --ring: #6aa6ff;
+    --link: #7db4ff;
+    --accent-soft: #14233f;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -8px rgb(0 0 0 / 0.6);
+    --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.4), 0 40px 80px -24px rgb(36 66 216 / 0.35);
+    --nav-bg: rgb(9 9 11 / 0.72);
+    --grad-from: #38c8ff;
+    --grad-via: #5b9bff;
+    --grad-to: #8f9bff;
+    --success: #4ade80;
+    --danger: #f97066;
+  }
+}
+:root[data-theme="dark"] {
+  --background: #09090b;
+  --foreground: #f5f5f7;
+  --card: #141417;
+  --muted: #1b1b20;
+  --muted-foreground: #a3a8b5;
+  --border: #2a2b31;
+  --ring: #6aa6ff;
+  --link: #7db4ff;
+  --accent-soft: #14233f;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px -8px rgb(0 0 0 / 0.6);
+  --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.4), 0 40px 80px -24px rgb(36 66 216 / 0.35);
+  --nav-bg: rgb(9 9 11 / 0.72);
+  --grad-from: #38c8ff;
+  --grad-via: #5b9bff;
+  --grad-to: #8f9bff;
+  --success: #4ade80;
+  --danger: #f97066;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 2.25rem;
+  --shadow-soft: var(--shadow);
+  --shadow-big: var(--shadow-lg);
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  * { border-color: var(--border); }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+    background: var(--background);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* Radix sets this inline on the tab list; the prerender strips inline styles, so it lives here. */
+  [data-slot="tabs-list"]:focus { outline: none; }
+  img { display: block; max-width: 100%; height: auto; }
+  h1, h2, h3 { text-wrap: balance; letter-spacing: -0.02em; line-height: 1.1; }
+  :focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+  ::selection { background: color-mix(in srgb, var(--ring) 30%, transparent); }
+}
+
+/* Vietnamese visitors wait for the client render instead of seeing English flash. */
+html[data-lang="vi"]:not([data-ready]) #root { visibility: hidden; }
+
+/* ---------- Brand ---------- */
+.text-gradient {
+  background-image: linear-gradient(100deg, var(--grad-from), var(--grad-via) 55%, var(--grad-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+.bg-brand {
+  background-image: linear-gradient(135deg, #1f6fe8 0%, #2442d8 100%);
+  color: #fff;
+}
+.hero-glow {
+  background:
+    radial-gradient(60% 55% at 50% 0%, color-mix(in srgb, #38c8ff 22%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 85% 10%, color-mix(in srgb, #2442d8 16%, transparent), transparent 70%);
+}
+
+/* ---------- Scroll reveal (only once JS has flagged the page) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-js] .reveal {
+    transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  html[data-js] .reveal:not([data-in]) { opacity: 0; transform: translateY(24px); }
+  .rise { animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--d, 0ms); }
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } }
+  .float-a { animation: float 7s ease-in-out infinite; }
+  .float-b { animation: float 8s ease-in-out -2s infinite; }
+  @keyframes float { 50% { transform: translateY(-6px); } }
+}
+
+.d1 { --d: 80ms; } .d2 { --d: 160ms; } .d3 { --d: 240ms; } .d4 { --d: 320ms; }
+
+/* ---------- The Natter window mock ---------- */
+.mock {
+  --m-bg: #ffffff; --m-panel: #f6f7f9; --m-text: #1c1e21; --m-sub: #5f6368; --m-line: #e4e6eb;
+  --m-in: #eceef2; --m-in-text: #1c1e21; --m-out: #1f6fe8; --m-out-text: #ffffff; --m-sel: #e7f0ff; --m-bar: #ebecf0; --m-badge: #d92d20;
+  background: var(--m-bg); color: var(--m-text);
+}
+.mock[data-mock="grey"] {
+  --m-bg: #3a3b3c; --m-panel: #303132; --m-text: #e8eaed; --m-sub: #b8bbc0; --m-line: #4a4c4e;
+  --m-in: #505254; --m-in-text: #f1f2f4; --m-out: #1f6fe8; --m-out-text: #ffffff; --m-sel: #46484b; --m-bar: #2b2c2d; --m-badge: #f04438;
+}
+.mock[data-mock="dark"] {
+  --m-bg: #000000; --m-panel: #0b0b0c; --m-text: #e8eaed; --m-sub: #a9adb3; --m-line: #232325;
+  --m-in: #262628; --m-in-text: #f1f2f4; --m-out: #2a73e8; --m-out-text: #ffffff; --m-sel: #1a1b1d; --m-bar: #0b0b0c; --m-badge: #f04438;
+}
+.mock[data-mock="contrast"] {
+  --m-bg: #000000; --m-panel: #000000; --m-text: #ffffff; --m-sub: #ffffff; --m-line: #ffffff;
+  --m-in: #000000; --m-in-text: #ffffff; --m-out: #ffff00; --m-out-text: #000000; --m-sel: #1a1a1a; --m-bar: #000000; --m-badge: #ff5a4d;
+}
+.mock, .mock * { transition: background-color 0.25s, color 0.25s, border-color 0.25s; }
+@media (prefers-reduced-motion: reduce) { .mock, .mock * { transition: none; } }
+.mock-panel { background: var(--m-panel); border-color: var(--m-line); }
+.mock-line { border-color: var(--m-line); }
+.mock-sub { color: var(--m-sub); }
+.mock-sel { background: var(--m-sel); }
+.mock-bar { background: var(--m-bar); border-color: var(--m-line); }
+.mock-in { background: var(--m-in); color: var(--m-in-text); }
+.mock-out { background: var(--m-out); color: var(--m-out-text); }
+.mock[data-mock="contrast"] .mock-in { border: 1px solid #fff; }
+.mock-badge { background: var(--m-badge); color: #fff; }
+
+/* ---------- Notification banners ---------- */
+.banner {
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.6);
+  box-shadow: var(--shadow), 0 0 0 1px var(--border);
+}
+
+/* Soft stage behind the notification banners, so their blur has something to show. */
+.stage {
+  background:
+    radial-gradient(70% 70% at 20% 10%, color-mix(in srgb, #38c8ff 26%, transparent), transparent 70%),
+    radial-gradient(60% 70% at 90% 90%, color-mix(in srgb, #2442d8 22%, transparent), transparent 70%),
+    var(--muted);
+}

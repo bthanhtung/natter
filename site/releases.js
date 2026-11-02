@@ -2,6 +2,8 @@
 export const REPO = "bthanhtung/natter";
 export const RELEASES_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 export const RELEASES_PAGE = `https://github.com/${REPO}/releases/latest`;
+/** Where the installers live until a public release exists: the Artifacts of one Actions run. */
+export const ARTIFACTS_URL = `https://github.com/${REPO}/actions/runs/41448717779#artifacts`;
 
 /** Download rows, in page order. `ext` is how a file of that kind ends. */
 export const PLATFORMS = [
