@@ -85,6 +85,20 @@ change still works with Facebook set to another language.
 - Anything that touches sign-in, sessions, permissions or IPC commands needs a clear explanation in
   the pull request.
 
+## Accessibility check
+
+Natter shows Meta's page, so report only what Natter changes. If the same
+problem appears on facebook.com/messages in a browser, it's Meta's.
+
+- [ ] Keyboard: Tab reaches the chat list, message box and Preferences, in a sensible order
+- [ ] Focus: the focused element stays visible, in every theme
+- [ ] Keyboard: menus, Preferences and dialogs open, work and close without a mouse
+- [ ] Screen reader: chats, messages and Preferences controls are read with names
+      (VoiceOver on macOS, Narrator or NVDA on Windows, Orca on Linux)
+- [ ] Contrast: text stays readable in Grey, Dark and High contrast
+- [ ] New notifications and the unread badge don't move focus
+- [ ] Say which app (Natter or Lite), which OS and which screen reader you tested
+
 ## Pull requests
 
 1. Fork, create a branch from `main` (`fix/unread-badge`, `feat/translations`…).

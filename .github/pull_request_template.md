@@ -13,3 +13,4 @@
 - [ ] Stays a window around Messenger: no unofficial APIs, scraping or automation
 - [ ] Screenshots / clips (for visual changes) show no personal conversations
 - [ ] Sign-in, session, permission or IPC changes are explained above
+- [ ] UI, CSS or injected-script changes pass the [accessibility check](../blob/main/CONTRIBUTING.md#accessibility-check)
