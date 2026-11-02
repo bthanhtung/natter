@@ -2,8 +2,20 @@
 export const REPO = "bthanhtung/natter";
 export const RELEASES_API = `https://api.github.com/repos/${REPO}/releases/latest`;
 export const RELEASES_PAGE = `https://github.com/${REPO}/releases/latest`;
-/** Where the installers live until a public release exists: the Artifacts of one Actions run. */
-export const ARTIFACTS_URL = `https://github.com/${REPO}/actions/runs/41448717779#artifacts`;
+
+/** The release the page links to before (or without) the API. Update it on each release. */
+export const KNOWN_RELEASE = {
+  tag: "v1.0.0",
+  date: "2026-11-02T17:42:39Z",
+  assets: [
+    ["Natter-1.0.0-universal.dmg", 213120542],
+    ["Natter.Setup.1.0.0.exe", 106346987],
+    ["natter_1.0.0_amd64.deb", 93200856],
+    ["natter-1.0.0.x86_64.rpm", 82540953],
+    ["natter-1.0.0.pacman", 84423076],
+    ["Natter-1.0.0.AppImage", 119405831],
+  ].map(([name, size]) => ({ name, size, browser_download_url: `https://github.com/${REPO}/releases/download/v1.0.0/${name}` })),
+};
 
 /** Download rows, in page order. `ext` is how a file of that kind ends. */
 export const PLATFORMS = [

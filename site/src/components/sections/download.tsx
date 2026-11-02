@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Check, Copy, Download as DownloadIcon, TriangleAlert } from "lucide-react";
-import { ARTIFACTS_URL, RELEASES_PAGE, formatSize } from "../../../releases.js";
+import { formatSize } from "../../../releases.js";
 import { Section, SectionHeading } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,24 +33,6 @@ const ROWS: Row[] = [
   },
 ];
 
-const ARTIFACT_NAME = { mac: "Natter-macOS", windows: "Natter-Windows", linux: "Natter-Linux" } as const;
-
-function ArtifactsButton({ row }: { row: Row }) {
-  const { t, f } = useLang();
-  return (
-    <Button asChild variant="secondary" className="w-full sm:w-auto">
-      <a href={ARTIFACTS_URL} target="_blank" rel="noopener noreferrer">
-        {f(t.ctaDownloadFor, { name: row.name })}
-        <ArrowUpRight className="size-4" aria-hidden="true" />
-        <span className="sr-only">
-          {" "}
-          ({ARTIFACT_NAME[row.id]}, {t.viaArtifacts})
-        </span>
-      </a>
-    </Button>
-  );
-}
-
 function FileButton({ asset, label, row }: { asset: Asset; label: string | null; row: Row }) {
   const { t, f } = useLang();
   const size = asset.size ? formatSize(asset.size) : null;
@@ -65,10 +47,10 @@ function FileButton({ asset, label, row }: { asset: Asset; label: string | null;
   );
 }
 
-function PlatformRow({ row, natter, os }: { row: Row; natter: Assets | null; os: OS }) {
+function PlatformRow({ row, natter, os }: { row: Row; natter: Assets; os: OS }) {
   const { t } = useLang();
   const mine = os === row.os;
-  const found = natter ? row.files.flatMap(({ key, label }) => (natter[key] ? [{ asset: natter[key] as Asset, label }] : [])) : [];
+  const found = row.files.flatMap(({ key, label }) => (natter[key] ? [{ asset: natter[key] as Asset, label }] : []));
 
   return (
     <li
@@ -85,36 +67,23 @@ function PlatformRow({ row, natter, os }: { row: Row; natter: Assets | null; os:
         <p className="text-sm text-muted-foreground">{t[row.note]}</p>
       </div>
       <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-        {found.length ? (
-          found.map(({ asset, label }) => <FileButton key={asset.name} asset={asset} label={label ? t[label] : null} row={row} />)
-        ) : (
-          <ArtifactsButton row={row} />
-        )}
+        {found.map(({ asset, label }) => (
+          <FileButton key={asset.name} asset={asset} label={label ? t[label] : null} row={row} />
+        ))}
       </div>
     </li>
   );
 }
 
 function statusText(state: ReleaseState, lang: string, t: Dict, f: (s: string, v: Record<string, string>) => string) {
-  switch (state.status) {
-    case "loading":
-      return t.loading;
-    case "none":
-      return t.soon;
-    case "busy":
-      return t.busy;
-    case "ready": {
-      const date = new Date(state.date).toLocaleDateString(lang === "vi" ? "vi-VN" : "en-US", { dateStyle: "medium" });
-      return f(t.latest, { tag: state.tag, date });
-    }
-  }
+  const date = new Date(state.date).toLocaleDateString(lang === "vi" ? "vi-VN" : "en-US", { dateStyle: "medium" });
+  return f(t.latest, { tag: state.tag, date });
 }
 
 function NatterCard() {
   const { t, f, lang } = useLang();
   const os = useOS();
   const release = useRelease();
-  const natter = release.status === "ready" ? release.natter : null;
 
   return (
     <Card className="reveal min-w-0 rounded-3xl p-7 sm:p-9">
@@ -126,14 +95,6 @@ function NatterCard() {
         <CardDescription>{t.natterPitch}</CardDescription>
         <p role="status" className="text-sm font-medium text-muted-foreground">
           {statusText(release, lang, t, f)}
-          {release.status === "busy" ? (
-            <>
-              {" "}
-              <a href={RELEASES_PAGE} className="text-link underline underline-offset-4">
-                {t.openReleases}
-              </a>
-            </>
-          ) : null}
         </p>
       </CardHeader>
 
@@ -141,16 +102,9 @@ function NatterCard() {
 
       <ul className="flex flex-col gap-3">
         {ROWS.map((row) => (
-          <PlatformRow key={row.id} row={row} natter={natter} os={os} />
+          <PlatformRow key={row.id} row={row} natter={release.natter} os={os} />
         ))}
       </ul>
-
-      {!natter ? (
-        <div className="rounded-2xl bg-muted p-5 text-[0.95rem]">
-          {release.status === "none" ? <p className="mb-1 font-semibold">{t.artifactsTitle}</p> : null}
-          <p className="text-muted-foreground">{t.artifactsBody}</p>
-        </div>
-      ) : null}
     </Card>
   );
 }

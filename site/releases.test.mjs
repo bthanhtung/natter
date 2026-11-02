@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { detectOS, formatSize, primaryPlatform, sortAssets } from "./releases.js";
+import { KNOWN_RELEASE, detectOS, formatSize, primaryPlatform, sortAssets } from "./releases.js";
 
 // Names the two workflows produce, after GitHub turns spaces into dots.
 const files = [
@@ -27,6 +27,14 @@ test("every build lands on its platform and channel", () => {
 test("an empty or unknown release gives no links", () => {
   assert.deepEqual(sortAssets([]), { natter: {}, lite: {} });
   assert.deepEqual(sortAssets([{ name: "notes.txt" }]), { natter: {}, lite: {} });
+});
+
+test("the known release has a direct link for every platform", () => {
+  const { natter } = sortAssets(KNOWN_RELEASE.assets);
+  assert.deepEqual(Object.keys(natter).sort(), ["appimage", "arch", "deb", "mac", "rpm", "windows"]);
+  for (const asset of Object.values(natter)) {
+    assert.ok(asset.browser_download_url.startsWith("https://github.com/bthanhtung/natter/releases/download/v1.0.0/"));
+  }
 });
 
 test("detects the system, and mobile is not a desktop", () => {

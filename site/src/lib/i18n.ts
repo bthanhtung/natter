@@ -146,14 +146,9 @@ export const en = {
   // Download
   downloadTitle: "Download",
   downloadLede: "Pick the one that fits. Both are free.",
-  loading: "Checking the latest release…",
   latest: "Latest: {tag}, {date}",
-  soon: "No public release yet. Use the GitHub Artifacts buttons below.",
-  busy: "GitHub is busy right now.",
-  openReleases: "Open the releases page",
   natterPitch: "Runs on Chromium. Take this one if you make calls.",
   yourSystem: "Your system",
-  viaArtifacts: "From GitHub Artifacts (zip)",
   directSize: "{size}",
   mobileNote: "Natter is for computers, so open this page on one.",
   noteMac: "macOS 13+ · Apple silicon & Intel",
@@ -163,9 +158,6 @@ export const en = {
   distroRpm: "Fedora",
   distroArch: "Arch Linux",
   distroAppImage: "Other Linux",
-  artifactsTitle: "No public release yet",
-  artifactsBody:
-    "The installers are under Artifacts on that GitHub page, named Natter-macOS, Natter-Windows and Natter-Linux. Each comes as a zip, and GitHub asks you to sign in to download it. Natter-Linux holds the deb, rpm, pacman and AppImage files.",
   unsigned:
     "Builds aren't code-signed yet, so the first launch shows a warning. On macOS use System Settings → Privacy & Security → Open Anyway. On Windows click More info → Run anyway.",
 
@@ -347,14 +339,9 @@ export const vi: Dict = {
 
   downloadTitle: "Tải về",
   downloadLede: "Chọn bản phù hợp với bạn. Cả hai đều miễn phí.",
-  loading: "Đang kiểm tra bản mới nhất…",
   latest: "Mới nhất: {tag}, {date}",
-  soon: "Chưa có bản phát hành công khai. Hãy dùng các nút GitHub Artifacts bên dưới.",
-  busy: "GitHub đang bận.",
-  openReleases: "Mở trang phát hành",
   natterPitch: "Chạy trên Chromium. Chọn bản này nếu bạn hay gọi.",
   yourSystem: "Hệ điều hành của bạn",
-  viaArtifacts: "Từ GitHub Artifacts (zip)",
   directSize: "{size}",
   mobileNote: "Natter dành cho máy tính, hãy mở trang này trên máy tính.",
   noteMac: "macOS 13 trở lên · Apple silicon và Intel",
@@ -364,9 +351,6 @@ export const vi: Dict = {
   distroRpm: "Fedora",
   distroArch: "Arch Linux",
   distroAppImage: "Linux khác",
-  artifactsTitle: "Chưa có bản phát hành công khai",
-  artifactsBody:
-    "Các bản cài nằm trong mục Artifacts của trang GitHub đó, với tên Natter-macOS, Natter-Windows và Natter-Linux. Mỗi bản là một file zip, và GitHub yêu cầu bạn đăng nhập mới tải được. Natter-Linux chứa các file deb, rpm, pacman và AppImage.",
   unsigned:
     "Các bản cài chưa được ký số nên lần mở đầu sẽ có cảnh báo. Trên macOS vào System Settings → Privacy & Security → Open Anyway. Trên Windows bấm More info → Run anyway.",
 
