@@ -37,9 +37,17 @@ function FileButton({ asset, label, row }: { asset: Asset; label: string | null;
   const { t, f } = useLang();
   const size = asset.size ? formatSize(asset.size) : null;
   return (
-    <Button asChild className="w-full sm:w-auto" variant={label ? "outline" : "default"} size={label ? "sm" : "default"}>
+    <Button
+      asChild
+      className={cn(
+        "h-auto w-full min-w-0 py-2 text-center",
+        label ? "min-h-9 whitespace-nowrap px-3" : "min-h-11 whitespace-normal",
+      )}
+      variant={label ? "outline" : "default"}
+      size={label ? "sm" : "default"}
+    >
       <a href={asset.browser_download_url}>
-        <DownloadIcon className="size-4" aria-hidden="true" />
+        {label ? null : <DownloadIcon className="size-4" aria-hidden="true" />}
         {label ?? f(t.ctaDownloadFor, { name: row.name })}
         {size ? <span className="font-normal opacity-80">{f(t.directSize, { size })}</span> : null}
       </a>
@@ -55,7 +63,7 @@ function PlatformRow({ row, natter, os }: { row: Row; natter: Assets; os: OS }) 
   return (
     <li
       className={cn(
-        "flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between",
+        "flex flex-col gap-4 rounded-2xl border p-5",
         mine ? "border-link bg-accent-soft" : "border-border bg-background",
       )}
     >
@@ -66,7 +74,7 @@ function PlatformRow({ row, natter, os }: { row: Row; natter: Assets; os: OS }) 
         </div>
         <p className="text-sm text-muted-foreground">{t[row.note]}</p>
       </div>
-      <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+      <div className={cn("grid gap-2", found.length > 1 && "sm:grid-cols-2")}>
         {found.map(({ asset, label }) => (
           <FileButton key={asset.name} asset={asset} label={label ? t[label] : null} row={row} />
         ))}
