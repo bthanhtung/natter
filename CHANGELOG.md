@@ -1,21 +1,18 @@
 # Changelog
 
-## 0.2.0 — unreleased
+## 1.0.0
 
-- **New name: Natter** (was Pure Messenger), "an unofficial desktop app for Facebook Messenger".
-  The Chromium build is **Natter**, the system-webview build is **Natter Lite**.
-- New app ids (`io.github.bthanhtung.natter`, `io.github.bthanhtung.natter.lite`). Natter moves your
-  Pure Messenger session over on first launch; Natter Lite asks you to sign in once.
-- **License: GPL-3.0** (was PolyForm Noncommercial).
-- Both builds now live on the `main` branch.
-- Lite: strict Content Security Policy for the app's own pages.
-- Releases: a `.sha256` checksum and a signed build provenance attestation for every file.
-- Contributor guide, issue forms, security policy and code of conduct.
-
-## 0.1.0 – 0.1.4 — as Pure Messenger
+The first release of Natter, an unofficial desktop app for Facebook Messenger. It comes in two builds:
+**Natter** on Chromium and **Natter Lite** on the system webview.
 
 - Chat-only window for `facebook.com/messages` with a desktop look, macOS glass and six themes.
+- Calls, including end-to-end encrypted chats, in Natter.
 - Unread badge, notifications with Do not disturb, menu bar / tray, open at login.
-- Drag-and-drop and paste attachments; downloads to the Downloads folder.
+- Drag-and-drop and paste attachments; downloads go to the Downloads folder.
 - Sign-in captchas and Meta account checks stay in the app; other links open in the browser.
-- 0.1.4 added the Chromium build, which can call in end-to-end encrypted chats.
+- Lite: strict Content Security Policy for the app's own pages.
+- Builds for macOS, Windows, Ubuntu, Debian, Fedora and Arch Linux, with a `.sha256` checksum for every file.
+- License: GPL-3.0.
+
+Natter continues a personal project called Pure Messenger: Natter moves its session over on first
+launch, and Natter Lite asks you to sign in once.

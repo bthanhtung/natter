@@ -1,6 +1,6 @@
 [package]
 name = "natter"
-version = "0.2.0"
+version = "1.0.0"
 description = "Natter Lite, an unofficial desktop app for Facebook Messenger"
 repository = "https://github.com/bthanhtung/natter"
 edition = "2021"

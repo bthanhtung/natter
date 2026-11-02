@@ -1,7 +1,9 @@
 {
   "name": "natter",
   "productName": "Natter",
-  "version": "0.2.0",
+  "version": "1.0.0",
+  "homepage": "https://github.com/bthanhtung/natter",
+  "author": "TungDaDev",
   "private": true,
   "description": "An unofficial desktop app for Facebook Messenger, on Chromium, with voice and video calls",
   "license": "GPL-3.0-only",
@@ -56,7 +58,8 @@
       "target": [
         "AppImage",
         "deb",
-        "rpm"
+        "rpm",
+        "pacman"
       ],
       "icon": "../src-tauri/icons/icon.png",
       "category": "Network",

@@ -69,6 +69,7 @@ Download from [**Releases**](https://github.com/bthanhtung/natter/releases). Fil
 | Windows 10/11 (64-bit) | `.exe` (Lite also `.msi`) | Run it |
 | Ubuntu / Debian | `.deb` | `sudo apt install ./<file>.deb` |
 | Fedora | `.rpm` | `sudo dnf install ./<file>.rpm` |
+| Arch Linux | `.pacman` (Natter), `.pkg.tar.zst` (Lite) | `sudo pacman -U ./<file>` |
 | Other Linux | `.AppImage` | `chmod +x <file>.AppImage`, then run it |
 
 **The first launch shows a warning** because the builds are not code-signed (signing certificates cost money every year; this is a free side project):
@@ -82,8 +83,8 @@ Prefer no warnings at all? [Build it yourself](#build-it-yourself) — apps you 
 **Verify your download.** Every release file comes with a `.sha256` checksum and a signed [build provenance attestation](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations) proving it was built by GitHub Actions from this repository:
 
 ```sh
-shasum -a 256 -c "Natter Lite_0.2.0_universal.dmg.sha256"     # Windows: Get-FileHash <file>
-gh attestation verify "Natter Lite_0.2.0_universal.dmg" --repo bthanhtung/natter
+shasum -a 256 -c "Natter Lite_1.0.0_universal.dmg.sha256"     # Windows: Get-FileHash <file>
+gh attestation verify "Natter Lite_1.0.0_universal.dmg" --repo bthanhtung/natter
 ```
 
 **First sign-in:** Facebook sees each install as a new device. Sign in, then enter your Messenger PIN when asked so your encrypted chat history is restored.
@@ -100,6 +101,7 @@ gh attestation verify "Natter Lite_0.2.0_universal.dmg" --repo bthanhtung/natter
 Natter shows **Meta's own Messenger page** (`facebook.com/messages`) in a native window and restyles it with CSS and a small script. That's all.
 
 - ❌ No unofficial APIs, no scraping, no automation, no message reading or storage.
+- ❌ No changes to Facebook's code: Natter doesn't patch its modules or switch on its hidden feature flags. It adds CSS and a small script that adjusts the layout, routes links, counts unread chats and passes the page's notifications to your system.
 - ❌ No analytics, telemetry, ads or servers of its own. The app talks to Facebook and nothing else.
 - ✅ Its only file is `settings.json`; your Facebook session lives in the app's own data folder and is never logged or sent anywhere.
 - ✅ The page can call only a handful of narrow app commands (unread badge, notification, theme, open link). Only the bundled Preferences window can read or change settings. In Lite this is enforced by Tauri capabilities scoped to HTTPS Facebook origins, and the app's own pages run under a strict Content Security Policy.
@@ -176,7 +178,7 @@ More in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Known limitations
 
-- **Lite on macOS/Linux:** no calls in encrypted chats (Facebook's decision for every WebKit browser, Safari included); encrypted chats you haven't opened can show older messages for a while.
+- **Lite on macOS/Linux:** no calls in encrypted chats, because Facebook keeps them off for WebKit behind a feature flag and Natter doesn't override Facebook's flags; encrypted chats you haven't opened can show older messages for a while.
 - Facebook doesn't accept `.zip` attachments on the web, in any browser.
 - The unread count covers the conversations Messenger has loaded (the most recent ones).
 - Natter (Chromium) can't sign in with passkeys (an Electron limitation); use your password.
@@ -205,9 +207,9 @@ Bug reports, fixes and ideas are very welcome — see [CONTRIBUTING.md](CONTRIBU
 
 - **macOS:** mở `.dmg`, kéo app vào Applications. Lần đầu bị chặn thì vào System Settings → Privacy & Security → **Open Anyway** (app chưa ký số vì chứng chỉ tốn phí hằng năm).
 - **Windows:** chạy `.exe`; nếu SmartScreen cảnh báo, bấm **More info → Run anyway**.
-- **Ubuntu/Debian:** `sudo apt install ./<file>.deb` · **Fedora:** `sudo dnf install ./<file>.rpm` · **Linux khác:** `chmod +x <file>.AppImage` rồi mở.
+- **Ubuntu/Debian:** `sudo apt install ./<file>.deb` · **Fedora:** `sudo dnf install ./<file>.rpm` · **Arch:** `sudo pacman -U ./<file>` (`.pacman` hoặc `.pkg.tar.zst`) · **Linux khác:** `chmod +x <file>.AppImage` rồi mở.
 
-**An toàn:** app chỉ hiển thị trang Messenger chính chủ của Facebook, không dùng API lậu, không tự động hoá, không đọc hay lưu tin nhắn, không gửi dữ liệu đi đâu khác. Toàn bộ phần chèn vào trang nằm ở `src-tauri/inject/`. Muốn chắc chắn hơn thì tự build từ mã nguồn (hướng dẫn ở trên) — app tự build sẽ không bị cảnh báo.
+**An toàn:** app chỉ hiển thị trang Messenger chính chủ của Facebook, không dùng API lậu, không sửa code của Facebook (không vá module, không bật cờ ẩn), không tự động hoá, không đọc hay lưu tin nhắn, không gửi dữ liệu đi đâu khác. App vẫn là ứng dụng không chính thức nên không thể đảm bảo tuyệt đối cho tài khoản. Toàn bộ phần chèn vào trang nằm ở `src-tauri/inject/`. Muốn chắc chắn hơn thì tự build từ mã nguồn (hướng dẫn ở trên) — app tự build sẽ không bị cảnh báo.
 
 **Sử dụng:** đăng nhập Facebook trong app, nhập mã PIN Messenger để khôi phục chat mã hoá. Cài đặt: ⌘, (macOS) hoặc Ctrl+, (Windows/Linux).
 

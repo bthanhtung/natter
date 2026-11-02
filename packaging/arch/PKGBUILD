@@ -1,0 +1,15 @@
+# Packages Natter Lite for Arch Linux from a finished Tauri .deb bundle (see the "arch" job in
+# .github/workflows/build.yml). Run `npx tauri build --bundles deb` first, then makepkg here.
+pkgname=natter-lite
+pkgver=$(node -p "require('../../src-tauri/tauri.conf.json').version")
+pkgrel=1
+pkgdesc='Unofficial desktop app for Facebook Messenger'
+arch=('x86_64')
+url='https://github.com/bthanhtung/natter'
+license=('GPL-3.0-only')
+depends=('webkit2gtk-4.1' 'gtk3' 'libayatana-appindicator' 'xdotool')
+options=('!strip' '!debug')
+
+package() {
+  cp -a "$startdir"/../../src-tauri/target/release/bundle/deb/*/data/. "$pkgdir"/
+}
