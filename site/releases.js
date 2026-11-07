@@ -14,6 +14,12 @@ export const KNOWN_RELEASE = {
     ["natter-1.0.0.x86_64.rpm", 82540953],
     ["natter-1.0.0.pacman", 84423076],
     ["Natter-1.0.0.AppImage", 119405831],
+    ["Natter.Lite_1.0.0_universal.dmg", 6178190],
+    ["Natter.Lite_1.0.0_x64-setup.exe", 1717761],
+    ["Natter.Lite_1.0.0_amd64.deb", 2966742],
+    ["Natter.Lite-1.0.0-1.x86_64.rpm", 2972849],
+    ["natter-lite-1.0.0-1-x86_64.pkg.tar.zst", 2759309],
+    ["Natter.Lite_1.0.0_amd64.AppImage", 81611256],
   ].map(([name, size]) => ({ name, size, browser_download_url: `https://github.com/${REPO}/releases/download/v1.0.0/${name}` })),
 };
 

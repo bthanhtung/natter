@@ -5,7 +5,7 @@ export type Asset = { name: string; size?: number; browser_download_url: string 
 export type Assets = Partial<Record<string, Asset>>;
 export type OS = "mac" | "windows" | "linux" | "mobile" | "other";
 
-export type ReleaseState = { status: "ready"; tag: string; date: string; natter: Assets };
+export type ReleaseState = { status: "ready"; tag: string; date: string; natter: Assets; lite: Assets };
 
 type Data = { tag: string; date: string; assets: Asset[] };
 
@@ -51,7 +51,7 @@ const toState = (tag: string, date: string, assets: Asset[]): ReleaseState => ({
   status: "ready",
   tag,
   date,
-  natter: sortAssets(assets).natter as Assets,
+  ...(({ natter, lite }) => ({ natter: natter as Assets, lite: lite as Assets }))(sortAssets(assets)),
 });
 
 const KNOWN_STATE = toState(KNOWN_RELEASE.tag, KNOWN_RELEASE.date, KNOWN_RELEASE.assets as Asset[]);

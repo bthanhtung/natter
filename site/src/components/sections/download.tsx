@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Check, Copy, Download as DownloadIcon, TriangleAlert } from "lucide-react";
+import { ArrowUpRight, Check, ChevronDown, Copy, Download as DownloadIcon, TriangleAlert } from "lucide-react";
 import { formatSize } from "../../../releases.js";
 import { Section, SectionHeading } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
@@ -33,7 +33,7 @@ const ROWS: Row[] = [
   },
 ];
 
-function FileButton({ asset, label, row }: { asset: Asset; label: string | null; row: Row }) {
+function FileButton({ asset, label, row, app }: { asset: Asset; label: string | null; row: Row; app?: string }) {
   const { t, f } = useLang();
   const size = asset.size ? formatSize(asset.size) : null;
   return (
@@ -48,17 +48,17 @@ function FileButton({ asset, label, row }: { asset: Asset; label: string | null;
     >
       <a href={asset.browser_download_url}>
         {label ? null : <DownloadIcon className="size-4" aria-hidden="true" />}
-        {label ?? f(t.ctaDownloadFor, { name: row.name })}
+        {label ?? (app ? f(t.ctaDownloadAppFor, { app, name: row.name }) : f(t.ctaDownloadFor, { name: row.name }))}
         {size ? <span className="font-normal opacity-80">{f(t.directSize, { size })}</span> : null}
       </a>
     </Button>
   );
 }
 
-function PlatformRow({ row, natter, os }: { row: Row; natter: Assets; os: OS }) {
+function PlatformRow({ row, assets, os, app }: { row: Row; assets: Assets; os: OS; app?: string }) {
   const { t } = useLang();
   const mine = os === row.os;
-  const found = row.files.flatMap(({ key, label }) => (natter[key] ? [{ asset: natter[key] as Asset, label }] : []));
+  const found = row.files.flatMap(({ key, label }) => (assets[key] ? [{ asset: assets[key] as Asset, label }] : []));
 
   return (
     <li
@@ -76,7 +76,7 @@ function PlatformRow({ row, natter, os }: { row: Row; natter: Assets; os: OS }) 
       </div>
       <div className={cn("grid gap-2", found.length > 1 && "sm:grid-cols-2")}>
         {found.map(({ asset, label }) => (
-          <FileButton key={asset.name} asset={asset} label={label ? t[label] : null} row={row} />
+          <FileButton key={asset.name} asset={asset} label={label ? t[label] : null} row={row} app={app} />
         ))}
       </div>
     </li>
@@ -110,14 +110,14 @@ function NatterCard() {
 
       <ul className="flex flex-col gap-3">
         {ROWS.map((row) => (
-          <PlatformRow key={row.id} row={row} natter={release.natter} os={os} />
+          <PlatformRow key={row.id} row={row} assets={release.natter} os={os} />
         ))}
       </ul>
     </Card>
   );
 }
 
-/* ---------- Natter Lite (build from source) ---------- */
+/* ---------- Natter Lite ---------- */
 
 const BUILD_STEPS = [
   "git clone https://github.com/bthanhtung/natter.git",
@@ -183,6 +183,7 @@ function Code({ lines, prompt = true, action }: { lines: string[]; prompt?: bool
 function LiteCard() {
   const { t, f } = useLang();
   const os = useOS();
+  const release = useRelease();
   const [tab, setTab] = useState("mac");
   useEffect(() => {
     if (os === "windows") setTab("windows");
@@ -193,59 +194,74 @@ function LiteCard() {
   return (
     <Card className="reveal d1 min-w-0 rounded-3xl p-7 sm:p-9">
       <CardHeader>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
+          <img src="/assets/icon.svg" alt="" width={44} height={44} className="size-11" />
           <CardTitle className="text-2xl">Natter Lite</CardTitle>
-          <Badge variant="outline">{t.liteBadge}</Badge>
         </div>
         <CardDescription>{t.litePitch}</CardDescription>
       </CardHeader>
 
-      <p className="rounded-2xl bg-accent-soft px-5 py-4 text-[0.95rem] font-medium">{t.liteNoInstaller}</p>
+      <ul className="flex flex-col gap-3">
+        {ROWS.map((row) => (
+          <PlatformRow key={row.id} row={row} assets={release.lite} os={os} app="Natter Lite" />
+        ))}
+      </ul>
 
-      <div className="flex flex-col gap-3">
-        <h4 className="font-semibold">{t.liteSteps}</h4>
-        <p className="text-[0.95rem] text-muted-foreground">{t.liteNeeds}</p>
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList aria-label={t.prereqLabel} className="rounded-2xl sm:rounded-full">
-            <TabsTrigger value="mac">{t.tabMac}</TabsTrigger>
-            <TabsTrigger value="windows">{t.tabWindows}</TabsTrigger>
-            <TabsTrigger value="ubuntu">{t.tabUbuntu}</TabsTrigger>
-            <TabsTrigger value="fedora">{t.tabFedora}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="mac">
-            <Code lines={["xcode-select --install"]} />
-          </TabsContent>
-          <TabsContent value="windows">
-            <p className="text-[0.95rem] text-muted-foreground">
-              {t.winPrereq}{" "}
-              <a href={BUILD_TOOLS_URL} className="font-medium text-link underline underline-offset-4">
-                {t.winPrereqLink}
-              </a>
-            </p>
-          </TabsContent>
-          <TabsContent value="ubuntu">
-            <Code lines={[APT]} />
-          </TabsContent>
-          <TabsContent value="fedora">
-            <Code lines={[DNF]} />
-          </TabsContent>
-        </Tabs>
-      </div>
+      <details className="group rounded-2xl border border-border bg-background">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-5 py-3 font-semibold marker:hidden focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-link [&::-webkit-details-marker]:hidden">
+          {t.liteBuild}
+          <ChevronDown
+            className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180 motion-reduce:transition-none"
+            aria-hidden="true"
+          />
+        </summary>
+        <div className="flex flex-col gap-4 px-5 pb-5">
+          <div className="flex flex-col gap-3">
+            <h4 className="font-semibold">{t.liteSteps}</h4>
+            <p className="text-[0.95rem] text-muted-foreground">{t.liteNeeds}</p>
+            <Tabs value={tab} onValueChange={setTab}>
+              <TabsList aria-label={t.prereqLabel} className="rounded-2xl sm:rounded-full">
+                <TabsTrigger value="mac">{t.tabMac}</TabsTrigger>
+                <TabsTrigger value="windows">{t.tabWindows}</TabsTrigger>
+                <TabsTrigger value="ubuntu">{t.tabUbuntu}</TabsTrigger>
+                <TabsTrigger value="fedora">{t.tabFedora}</TabsTrigger>
+              </TabsList>
+              <TabsContent value="mac">
+                <Code lines={["xcode-select --install"]} />
+              </TabsContent>
+              <TabsContent value="windows">
+                <p className="text-[0.95rem] text-muted-foreground">
+                  {t.winPrereq}{" "}
+                  <a href={BUILD_TOOLS_URL} className="font-medium text-link underline underline-offset-4">
+                    {t.winPrereqLink}
+                  </a>
+                </p>
+              </TabsContent>
+              <TabsContent value="ubuntu">
+                <Code lines={[APT]} />
+              </TabsContent>
+              <TabsContent value="fedora">
+                <Code lines={[DNF]} />
+              </TabsContent>
+            </Tabs>
+          </div>
 
-      <Code
-        lines={BUILD_STEPS}
-        action={<CopyButton text={BUILD_STEPS.join("\n")} label={f(t.copyLabel, { cmd: BUILD_STEPS.join(" && ") })} />}
-      />
+          <Code
+            lines={BUILD_STEPS}
+            action={<CopyButton text={BUILD_STEPS.join("\n")} label={f(t.copyLabel, { cmd: BUILD_STEPS.join(" && ") })} />}
+          />
 
-      <p className="text-[0.95rem] text-muted-foreground">
-        {f(t.liteOut, { path: "src-tauri/target/release/bundle" })}
-      </p>
-      <Button asChild variant="outline" className="w-full sm:w-fit">
-        <a href={README_LITE_URL}>
-          {t.liteReadme}
-          <ArrowUpRight className="size-4" aria-hidden="true" />
-        </a>
-      </Button>
+          <p className="text-[0.95rem] text-muted-foreground">
+            {f(t.liteOut, { path: "src-tauri/target/release/bundle" })}
+          </p>
+          <Button asChild variant="outline" className="w-full sm:w-fit">
+            <a href={README_LITE_URL}>
+              {t.liteReadme}
+              <ArrowUpRight className="size-4" aria-hidden="true" />
+            </a>
+          </Button>
+        </div>
+      </details>
     </Card>
   );
 }

@@ -30,10 +30,12 @@ test("an empty or unknown release gives no links", () => {
 });
 
 test("the known release has a direct link for every platform", () => {
-  const { natter } = sortAssets(KNOWN_RELEASE.assets);
-  assert.deepEqual(Object.keys(natter).sort(), ["appimage", "arch", "deb", "mac", "rpm", "windows"]);
-  for (const asset of Object.values(natter)) {
-    assert.ok(asset.browser_download_url.startsWith("https://github.com/bthanhtung/natter/releases/download/v1.0.0/"));
+  const { natter, lite } = sortAssets(KNOWN_RELEASE.assets);
+  for (const group of [natter, lite]) {
+    assert.deepEqual(Object.keys(group).sort(), ["appimage", "arch", "deb", "mac", "rpm", "windows"]);
+    for (const asset of Object.values(group)) {
+      assert.ok(asset.browser_download_url.startsWith("https://github.com/bthanhtung/natter/releases/download/v1.0.0/"));
+    }
   }
 });
 

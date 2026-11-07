@@ -29,6 +29,7 @@ export const en = {
     "Meta shut down the Messenger desktop app in December 2025. Natter brings back a calm window that holds your chats and nothing else.",
   ctaDownload: "Download",
   ctaDownloadFor: "Download for {name}",
+  ctaDownloadAppFor: "Download {app} for {name}",
   ctaGithub: "View on GitHub",
   metaFree: "Free",
   metaPlatforms: "macOS, Windows, Linux",
@@ -162,11 +163,9 @@ export const en = {
     "Builds aren't code-signed yet, so the first launch shows a warning. On macOS use System Settings → Privacy & Security → Open Anyway. On Windows click More info → Run anyway.",
 
   // Lite
-  liteBadge: "Build from source",
   litePitch:
     "Runs on your system's webview, about 10 MB. On macOS and Linux, calls in encrypted chats open in your browser.",
-  liteNoInstaller:
-    "Natter Lite has no prebuilt installer. You build it yourself from source, and the result is about 10 MB.",
+  liteBuild: "Build it yourself",
   liteSteps: "Build it",
   liteNeeds: "Needs Rust (stable) and Node.js 20+, plus the tools for your system:",
   liteOut: "The installers land in {path}.",
@@ -189,7 +188,7 @@ export const en = {
   q2: "Can my account get banned?",
   a2: "Natter loads the same page you'd open in a browser and automates nothing. As with any third-party app, there is no guarantee.",
   q3: "Which one should I pick?",
-  a3: "Natter if you make calls. Natter Lite if you mostly text and want it tiny, but it has no prebuilt installer, so you build it yourself from source. They can sit side by side, each with its own sign-in.",
+  a3: "Natter if you make calls. Natter Lite if you mostly text and want it tiny. Both can be installed side by side, each with its own sign-in.",
   q4: "Why sign in again and enter a PIN?",
   a4: "Facebook sees each install as a new device. Your Messenger PIN restores your encrypted chat history.",
 
@@ -228,6 +227,7 @@ export const vi: Dict = {
     "Meta đã đóng app Messenger cho máy tính từ tháng 12/2025. Natter mang lại một cửa sổ yên tĩnh, chỉ có các đoạn chat của bạn.",
   ctaDownload: "Tải về",
   ctaDownloadFor: "Tải cho {name}",
+  ctaDownloadAppFor: "Tải {app} cho {name}",
   ctaGithub: "Xem trên GitHub",
   metaFree: "Miễn phí",
   metaPlatforms: "macOS, Windows, Linux",
@@ -354,11 +354,9 @@ export const vi: Dict = {
   unsigned:
     "Các bản cài chưa được ký số nên lần mở đầu sẽ có cảnh báo. Trên macOS vào System Settings → Privacy & Security → Open Anyway. Trên Windows bấm More info → Run anyway.",
 
-  liteBadge: "Tự build từ mã nguồn",
   litePitch:
     "Chạy trên webview của hệ điều hành, khoảng 10 MB. Trên macOS và Linux, gọi trong chat mã hoá sẽ mở ở trình duyệt.",
-  liteNoInstaller:
-    "Natter Lite chưa có bản cài dựng sẵn. Bạn tự build từ mã nguồn, kết quả nặng khoảng 10 MB.",
+  liteBuild: "Tự build từ mã nguồn",
   liteSteps: "Cách build",
   liteNeeds: "Cần Rust (bản stable) và Node.js 20 trở lên, cùng các công cụ cho hệ điều hành của bạn:",
   liteOut: "Bản cài nằm trong {path}.",
@@ -380,7 +378,7 @@ export const vi: Dict = {
   q2: "Tài khoản có bị khoá không?",
   a2: "Natter tải đúng trang bạn mở trên trình duyệt và không tự động hoá gì. Nhưng như mọi app bên thứ ba, không có gì đảm bảo tuyệt đối.",
   q3: "Nên chọn bản nào?",
-  a3: "Natter nếu bạn hay gọi. Natter Lite nếu chủ yếu nhắn tin và muốn thật nhẹ, nhưng Lite chưa có bản cài dựng sẵn nên bạn tự build từ mã nguồn. Hai bản cài song song được, mỗi bản đăng nhập riêng.",
+  a3: "Natter nếu bạn hay gọi. Natter Lite nếu chủ yếu nhắn tin và muốn thật nhẹ. Hai bản cài song song được, mỗi bản đăng nhập riêng.",
   q4: "Vì sao phải đăng nhập lại và nhập PIN?",
   a4: "Facebook coi mỗi lần cài là một thiết bị mới. Mã PIN Messenger giúp khôi phục lịch sử chat mã hoá.",
 
